@@ -39,11 +39,16 @@ doctype_js = {
 }
 
 
-# franchise_erp/franchise_erp/hooks.py
 
-patches = [
-    "franchise_erp.patches.add_user_custom_fields"
-]
+# after_migrate = "franchise_erp.custom.add_user_custom_fields_v2"
+# # hooks.py
+# patches = [
+#     "franchise_erp.patches.add_user_custom_fields"
+# ]
+
+
+# hooks.py
+after_migrate = "franchise_erp.event.add_user_custom_fields.create_custom_fields"
 
 
 # include js, css files in header of desk.html
@@ -271,3 +276,9 @@ fixtures = [
 ]
 
 
+fixtures = [
+    {
+        "dt": "Custom Field",
+        "filters": [["name", "=", "User-company"]],
+    }
+]
