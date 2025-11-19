@@ -260,3 +260,5 @@ doctype_js = {
 # }
 
 fixtures = ["Custom Field", "Property Setter"]
+
+
