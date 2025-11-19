@@ -53,12 +53,14 @@ def remove_represents_company_in_return(doc, method):
 
 
 
+
 @frappe.whitelist()
 def get_user_role_profiles(user):
-    """Return list of role profiles assigned to user"""
-    profiles = frappe.get_all(
-        "Role Profile",
-        filters={"name": user},
-        pluck="role_profile"
+    profiles = frappe.db.get_all(
+        "User Role Profile",
+        filters={"parent": user},
+        fields=["role_profile"]
     )
-    return profiles
+
+    # profiles = [{"role_profile": "Franchise Role"}]
+    return [p["role_profile"] for p in profiles]

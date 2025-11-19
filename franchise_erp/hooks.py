@@ -39,10 +39,10 @@ doctype_js = {
 }
 
 # correct whitelisted override path
-override_whitelisted_methods = {
-    "franchise_erp.custom.customs.get_user_role_profiles": 
-        "franchise_erp.custom.customs.get_user_role_profiles"
-}
+# override_whitelisted_methods = {
+#     "franchise_erp.custom.customs.get_user_role_profiles": 
+#         "franchise_erp.custom.customs.get_user_role_profiles"
+# }
 # after_migrate = "franchise_erp.custom.add_user_custom_fields_v2"
 # # hooks.py
 # patches = [
