@@ -35,10 +35,14 @@ doc_events = {
 }
 
 doctype_js = {
-    "Purchase Invoice": "public/js/purchase_invoice.js"
+    "Purchase Invoice": "public/js/purchase_invoice.js",
 }
 
 
+# Run this patch during bench migrate
+patches = [
+    "franchise_erp.patches.add_user_custom_fields"
+]
 
 
 # include js, css files in header of desk.html
