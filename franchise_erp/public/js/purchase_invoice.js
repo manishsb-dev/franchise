@@ -1,31 +1,31 @@
 frappe.ui.form.on("Purchase Invoice", {
     before_submit(frm) {
 
-        // Fetch role profile list (child table inside User doc)
-        const role_profiles = frappe.user_doc?.role_profiles || [];
+        // ---- PRINT ROLE PROFILES IN CONSOLE ----
+        console.log("User Full Doc:", frappe.user_doc);  
+        console.log("Role Profile Child Table:", frappe.user_doc?.role_profiles);
 
-        // Extract only the names → ["Franchise Role", "HR", ...]
-        const profile_names = role_profiles.map(p => p.role_profile);
+        // Extract only the role_profile names
+        let role_profiles = (frappe.user_doc?.role_profiles || []).map(r => r.role_profile);
 
-        console.log("User Role Profiles:", profile_names);
+        // Print role names
+        console.log("Extracted Role Profiles:", role_profiles); 
 
-        const has_franchise_profile = profile_names.includes("Franchise Role");
-        const is_return_invoice = frm.doc.is_return === 1;
+        // ------------------------------------------
 
-        // Case 1: Franchise user cannot submit return PI
+        const has_franchise_profile = role_profiles.includes("Franchise Role");
+        const is_return_invoice = frm.doc.is_return == 1;
+
         if (has_franchise_profile && is_return_invoice) {
-            frappe.msgprint(__('Franchise user cannot submit Return Purchase Invoice'));
+            frappe.msgprint("Franchise user cannot submit Return Purchase Invoice");
             frappe.validated = false;
             return;
         }
 
-        // Case 2: Supplier (no franchise profile) cannot submit normal PI
         if (!has_franchise_profile && !is_return_invoice) {
-            frappe.msgprint(__('Supplier cannot submit Normal Purchase Invoice'));
+            frappe.msgprint("Supplier cannot submit Normal Purchase Invoice");
             frappe.validated = false;
             return;
         }
-
-        // Case 3: Allowed
     }
 });
