@@ -4,23 +4,23 @@ frappe.ui.form.on('Purchase Invoice', {
         const is_return = frm.doc.is_return;
         const owner = frm.doc.owner;
 
-        // Normal PI: only owner can submit
-        if (!is_return && current_user !== owner) {
+        // Allow Administrator always
+        if (current_user === "Administrator") {
+            return;
+        }
+
+        // Normal PI: owner (supplier) cannot submit
+        if (!is_return && current_user === owner) {
             frappe.msgprint("Supplier cannot submit Normal Purchase Invoice");
             frappe.validated = false;
             return;
         }
 
-        // Return PI: franchise user cannot submit return PI
+        // Return PI: supplier (owner) cannot submit
         if (is_return && current_user === owner) {
-            frappe.msgprint("User cannot submit Return Purchase Invoice");
+            frappe.msgprint("Supplier cannot submit Return Purchase Invoice");
             frappe.validated = false;
             return;
         }
-
-        // Supplier users can submit franchise return PI
-        // No action needed here; allowed
     }
 });
-
-

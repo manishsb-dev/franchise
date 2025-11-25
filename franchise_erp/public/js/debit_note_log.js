@@ -75,7 +75,7 @@ frappe.ui.form.on("Debit Note Log", {
                 <td>${row.item_code}</td>
                 <td>${row.qty}</td>
                 <td>${row.rate}</td>
-                <td>${row.distributed_discount_amount}</td>
+                <td>${row.additional_discount_percentage}</td>
                 <td>${row.net_amount}</td>
             </tr>
         `;
@@ -89,27 +89,32 @@ frappe.ui.form.on("Debit Note Log", {
 
 
 
-    // Show Create Debit Note button after invoices load
-    show_create_button(frm) {
+   show_create_button(frm) {
 
-        // Remove existing button if already added
-        frm.page.remove_inner_button("Create Debit Note");
+    frm.page.remove_inner_button("Create Journal Entry");
 
-        frm.page.add_inner_button("Create Debit Note", function () {
+    frm.page.add_inner_button("Create Journal Entry", function () {
 
-            frappe.call({
-                method: "franchise_erp.custom.debit_note.create_debit_note",
-                args: {
-                    company: frm.doc.company,
-                    from_date: frm.doc.from_date,
-                    to_date: frm.doc.to_date
-                },
-                callback(r) {
-                    frappe.msgprint(r.message);
-                    frm.reload_doc();
+        frappe.call({
+            method: "franchise_erp.custom.debit_note.create_debit_note",
+            args: {
+                company: frm.doc.company,
+                from_date: frm.doc.from_date,
+                to_date: frm.doc.to_date
+            },
+            callback(r) {
+
+                frappe.msgprint(r.message);
+
+                // Auto-open the generated JE
+                if (r.message && r.message.journal_entry) {
+                    frappe.set_route("Form", "Journal Entry", r.message.journal_entry);
                 }
-            });
-
+            }
         });
-    }
+
+    });
+}
+
+
 });
