@@ -26,6 +26,8 @@ frappe.ui.form.on('SIS Configuration', {
         }
     },
 
+    
+
     refresh(frm) {
         // Run on form load also
         frm.trigger('sis_debit_note_creation_period');
