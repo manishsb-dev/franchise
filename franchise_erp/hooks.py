@@ -28,7 +28,8 @@ app_license = "mit"
 
 doc_events = {
    "Purchase Invoice": {
-        "after_insert": "franchise_erp.custom.customs.set_franchise_owner",  
+       "before_insert": "franchise_erp.custom.customs.set_customer_email_as_owner",
+        # "after_insert": "franchise_erp.custom.customs.set_franchise_owner",  
     },
     # "Sales Invoice": {
     #     "on_submit": "franchise_erp.overrides.sales_invoice.apply_sis_company_margins"
@@ -63,9 +64,7 @@ after_migrate = [
 # after_migrate = "franchise_erp.event.add_user_custom_fields.create_custom_fields"
 
 
-# include js, css files in header of desk.html
-# app_include_css = "/assets/franchise_erp/css/franchise_erp.css"
-# app_include_js = "/assets/franchise_erp/js/franchise_erp.js"
+
 
 # include js, css files in header of web template
 # web_include_css = "/assets/franchise_erp/css/franchise_erp.css"
