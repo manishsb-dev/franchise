@@ -201,6 +201,7 @@ def create_debit_note(company, from_date, to_date):
         as_dict=True
     )
 
+
     if not config:
         frappe.throw("Please set Auto Credit Note Percent and Discount Threshold in SIS Configuration.")
 
