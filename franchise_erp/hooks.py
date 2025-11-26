@@ -43,7 +43,7 @@ doctype_js = {
     "SIS Debit Note Log": "public/js/debit_note_log.js",
     "SIS Configuration": "public/js/sis_configuration.js",
 }
-# correct whitelisted override path
+
 # override_whitelisted_methods = {
 #     "franchise_erp.custom.customs.get_user_role_profiles": 
 #         "franchise_erp.custom.customs.get_user_role_profiles"

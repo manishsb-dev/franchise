@@ -201,6 +201,7 @@ def create_debit_note(company, from_date, to_date):
         as_dict=True
     )
 
+
     if not config:
         frappe.throw("Please set Auto Credit Note Percent and Discount Threshold in SIS Configuration.")
 
@@ -219,7 +220,7 @@ def create_debit_note(company, from_date, to_date):
         {
             "company": company,
             "root_type": "Expense",
-            "name": ["like", f"SIS Penalty%{company_abbr}"]
+            "name": ["like", f"TZU Penalty%{company_abbr}"]
         },
         "name"
     )
@@ -227,7 +228,7 @@ def create_debit_note(company, from_date, to_date):
     if not penalty_account:
         frappe.throw(
             f"No Penalty Expense account found for {company}. "
-            f"Create account like 'SIS Penalty Exp - {company_abbr}'."
+            f"Create account like 'TZU Penalty Exp - {company_abbr}'."
         )
 
     # Fetch invoice ITEMS where discount exceeds threshold
