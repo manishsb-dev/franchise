@@ -6,7 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "column_break_jcqd",
+  "column_break_qtrl",
+  "sis_debit_note_creation_period",
+  "section_break_elev",
   "from_date",
   "column_break_klfj",
   "to_date"
@@ -21,15 +23,11 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_jcqd",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "from_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "in_list_view": 1,
-   "label": "From Date",
-   "reqd": 1
+   "label": "From Date"
   },
   {
    "fieldname": "column_break_klfj",
@@ -38,15 +36,29 @@
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "in_list_view": 1,
-   "label": "To Date",
-   "reqd": 1
+   "label": "To Date"
+  },
+  {
+   "fieldname": "column_break_qtrl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sis_debit_note_creation_period",
+   "fieldtype": "Data",
+   "label": "SIS Debit Note Creation Period",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_elev",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-26 15:27:52.982194",
+ "modified": "2025-11-27 12:38:55.180590",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "SIS Debit Note Log",

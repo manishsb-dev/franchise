@@ -29,11 +29,7 @@ app_license = "mit"
 doc_events = {
    "Purchase Invoice": {
        "before_insert": "franchise_erp.custom.customs.set_customer_email_as_owner",
-        # "after_insert": "franchise_erp.custom.customs.set_franchise_owner",  
-    },
-    # "Sales Invoice": {
-    #     "on_submit": "franchise_erp.overrides.sales_invoice.apply_sis_company_margins"
-    # }
+    }
 
 }
 
@@ -42,7 +38,9 @@ doctype_js = {
     "Purchase Invoice": "public/js/purchase_invoice.js",
     "SIS Debit Note Log": "public/js/debit_note_log.js",
     "SIS Configuration": "public/js/sis_configuration.js",
-    "Sales Invoice": "public/js/sales_invoice.js"
+    "Sales Invoice": "public/js/sales_invoice.js",
+    "User": "public/js/user_mobile_validation.js",
+    # "Sales Invoice Item": "public/js/calculation.js",
 }
 
 # override_whitelisted_methods = {
@@ -65,6 +63,7 @@ after_migrate = [
 # after_migrate = "franchise_erp.event.add_user_custom_fields.create_custom_fields"
 
 
+app_include_js = "/assets/franchise_erp/js/back_date_disabled.js"
 
 
 # include js, css files in header of web template
@@ -288,9 +287,15 @@ fixtures = [
 ]
 
 
+# fixtures = [
+#     {
+#         "dt": "Custom Field",
+#         "filters": [["name", "=", "User-company"]],
+#     }
+# ]
 fixtures = [
-    {
-        "dt": "Custom Field",
-        "filters": [["name", "=", "User-company"]],
-    }
-]
+
+        {"dt": "Workflow"}, 
+        {"dt": "Workflow State"},
+    {"dt": "Workflow Action Master"},
+        ]
