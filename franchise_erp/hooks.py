@@ -24,7 +24,7 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 
-on_login = "franchise_erp.custom.customs.validate_user_status"
+# on_login = "franchise_erp.custom.customs.validate_user_status"
 
 
 doc_events = {
