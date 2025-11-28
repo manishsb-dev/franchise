@@ -1,5 +1,4 @@
 frappe.ui.form.on("SIS Debit Note Log", {
-
     company: function (frm) {
         if (!frm.doc.company) return;
 
@@ -10,32 +9,30 @@ frappe.ui.form.on("SIS Debit Note Log", {
             method: "frappe.client.get",
             args: {
                 doctype: "SIS Configuration",
-                filters: { company: frm.doc.company }
+                filters: { company: frm.doc.company },
             },
             callback(r) {
                 if (r.message) {
                     let config = r.message;
 
                     // SET FIELD VALUE
-                    frm.set_value("sis_debit_note_creation_period", config.sis_debit_note_creation_period);
+                    frm.set_value(
+                        "sis_debit_note_creation_period",
+                        config.sis_debit_note_creation_period
+                    );
                 } else {
                     frappe.msgprint("No SIS Configuration found for this company.");
                 }
-            }
+            },
         });
     },
 
     refresh(frm) {
+        // First: auto fetch config when company is selected
         if (frm.doc.company) {
-            frm.trigger("company"); // Auto refresh on load
+            frm.trigger("company");
         }
-    }
 
-});
-
-frappe.ui.form.on("SIS Debit Note Log", {
-
-    refresh(frm) {
         // Remove button every refresh
         frm.page.remove_inner_button("Create Debit Note");
 
@@ -46,11 +43,10 @@ frappe.ui.form.on("SIS Debit Note Log", {
                     args: {
                         company: frm.doc.company,
                         from_date: frm.doc.from_date,
-                        to_date: frm.doc.to_date
+                        to_date: frm.doc.to_date,
                     },
                     callback(r) {
                         if (r.message && r.message.invoice_list) {
-
                             frm.invoice_list = r.message.invoice_list;
 
                             show_invoice_dialog(frm);
@@ -60,12 +56,13 @@ frappe.ui.form.on("SIS Debit Note Log", {
 
                             frappe.msgprint(r.message.message);
                         }
-                    }
+                    },
                 });
             });
         }
-    }
+    },
 });
+
 
 
 function show_invoice_dialog(frm) {
