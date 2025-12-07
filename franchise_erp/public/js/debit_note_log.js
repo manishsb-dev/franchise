@@ -203,6 +203,7 @@ function show_invoice_dialog(frm) {
                 </thead>
                 <tbody>
         `;
+        
 
         if (paginated.length === 0) {
             table += `<tr><td colspan="12" class="text-center">No Records Found</td></tr>`;
