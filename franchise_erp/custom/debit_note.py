@@ -820,8 +820,9 @@ def create_debit_note(company, period_type=None, invoices=None):
         # --------------------------
         # Fetch HO purchase GST + Value
         # --------------------------
-        input_gst_percent, input_gst_value, purchase_value = get_purchase_input_gst(item_code, company)
-
+        # input_gst_percent, input_gst_value, purchase_value = get_purchase_input_gst(item_code, company)
+        st_percent, gst_amount_per_item, single_item_rate = get_item_input_gst(item_code, company)
+        purchase_value = single_item_rate
         # -------------------------------------------------
         # ⭐ FINAL LOGIC — USE CD/DN VALUE IF PASSED
         # -------------------------------------------------
