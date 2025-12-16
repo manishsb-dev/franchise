@@ -29,24 +29,23 @@ frappe.ui.form.on("SIS Debit Note Log", {
     },
 
 
+    
 
     refresh(frm) {
         // First: auto fetch config when company is selected
         if (frm.doc.company) {
             frm.trigger("company");
         }
-
+ console.log("c:",frm.doc.company);
         // Remove button every refresh
         frm.page.remove_inner_button("Create Debit Note");
 
-        if (frm.doc.company && frm.doc.from_date && frm.doc.to_date) {
+        if (frm.doc.company) {
             frm.add_custom_button("Fetch Invoices", function () {
                 frappe.call({
                     method: "franchise_erp.custom.debit_note.fetch_invoices",
                     args: {
-                        company: frm.doc.company,
-                        from_date: frm.doc.from_date,
-                        to_date: frm.doc.to_date,
+                        company: frm.doc.company
                     },
                     callback(r) {
                         if (r.message && r.message.invoice_list) {
