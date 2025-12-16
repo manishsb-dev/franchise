@@ -1,5 +1,6 @@
 frappe.ui.form.on("SIS Debit Note Log", {
     company: function (frm) {
+        console.log("JS Loaded");
         if (!frm.doc.company) return;
 
         // Clear old value
