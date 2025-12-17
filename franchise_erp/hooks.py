@@ -59,6 +59,7 @@ doc_events = {
 
 
 doctype_js = {
+    "Purchase Order": "public/js/purchase_order.js",
     "Purchase Invoice": "public/js/purchase_invoice.js",
     "SIS Debit Note Log": "public/js/debit_note_log.js",
     "SIS Configuration": "public/js/sis_configuration.js",
