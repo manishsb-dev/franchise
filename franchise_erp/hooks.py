@@ -67,8 +67,6 @@ doctype_js = {
     "Incoming Logistics": "public/js/incoming_logistics.js",
     "Color": "public/js/colour_code.js",
     "Item": "public/js/item_master.js",
-    "Item": "public/js/item.js"
-
 }
 
 
