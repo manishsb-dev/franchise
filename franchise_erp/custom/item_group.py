@@ -26,3 +26,25 @@ def get_item_group_parents(child_group):
 
     frappe.logger().info(f"Item Group Parents: {result}")
     return result
+
+
+def set_custom_group_name(doc, method):
+    if doc.item_group_name:
+        doc.custom_group_name = doc.item_group_name
+
+
+
+# # franchise_erp/franchise_erp/custom/item_group.py
+# import frappe
+
+# def allow_child_duplicates(doc, method):
+#     """
+#     Skip ERPNext duplicate check for Item Group children.
+#     Only check duplicates for parent groups.
+#     """
+#     if doc.is_group == 0:
+#         # child node: skip duplicate validation
+#         return
+#     else:
+#         # parent node: ERPNext will automatically check duplicates
+#         pass
