@@ -1,5 +1,6 @@
 import frappe
 
+
 @frappe.whitelist()
 def get_item_group_parents(child_group):
     result = {
@@ -27,24 +28,41 @@ def get_item_group_parents(child_group):
     frappe.logger().info(f"Item Group Parents: {result}")
     return result
 
+@frappe.whitelist()
+def all_item_group_for_silvet(doctype, txt, searchfield, start, page_len, filters):
+    ItemGroup = frappe.qb.DocType("Item Group")
 
-def set_custom_group_name(doc, method):
-    if doc.item_group_name:
-        doc.custom_group_name = doc.item_group_name
+    base_groups = (
+        frappe.qb.from_(ItemGroup)
+        .select(
+            ItemGroup.name,
+            ItemGroup.parent_item_group,
+            ItemGroup.lft
+        )
+        .where(ItemGroup.name.like(f"%{txt}%"))
+        .orderby(ItemGroup.lft)
+        .limit(page_len)
+        .offset(start)
+    ).run(as_dict=True)
 
+    def get_full_path(name):
+        path = []
+        while name:
+            parent = frappe.db.get_value(
+                "Item Group",
+                name,
+                "parent_item_group"
+            )
+            path.insert(0, name)
+            name = parent
+        del path[0]
+        return " -> ".join(path)
 
+    results = []
+    for g in base_groups:
+        label = get_full_path(g["name"])
 
-# # franchise_erp/franchise_erp/custom/item_group.py
-# import frappe
+        if txt.lower() in label.lower():
+            results.append((g["name"], label))
 
-# def allow_child_duplicates(doc, method):
-#     """
-#     Skip ERPNext duplicate check for Item Group children.
-#     Only check duplicates for parent groups.
-#     """
-#     if doc.is_group == 0:
-#         # child node: skip duplicate validation
-#         return
-#     else:
-#         # parent node: ERPNext will automatically check duplicates
-#         pass
+    return results

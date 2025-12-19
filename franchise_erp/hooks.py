@@ -206,7 +206,9 @@ app_include_js = ["/assets/franchise_erp/js/back_date_disabled.js"]
 # Override standard doctype classes
 
 # override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
+# 	# "ToDo": "custom_app.overrides.CustomToDo"
+#     "Item Group": "franchise_erp.overrides.item_group.CustomItemGroup"
+
 # }
 
 # Document Events
