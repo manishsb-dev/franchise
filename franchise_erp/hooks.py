@@ -27,6 +27,7 @@ app_license = "mit"
 # on_login = "franchise_erp.custom.customs.validate_user_status"
 
 
+
 doc_events = {
     # "Purchase Order":{
     #    "before_submit" : "franchise_erp.custom.po_serial_generator.apply_po_serials"
@@ -55,15 +56,13 @@ doc_events = {
         "before_insert": "franchise_erp.custom.item_master.generate_item_code",
         "before_save": "franchise_erp.custom.item_master.generate_item_code",
     },
-     "Item Group": {
-        "before_insert": "franchise_erp.custom.item_group.set_custom_group_name",
-    },
-
-
+    "Item Group": {
+        "validate": "franchise_erp.custom.item_group.validate_same_parent",
+        "before_insert": ["franchise_erp.custom.item_group.set_hash_name","franchise_erp.custom.item_group.force_display_name"],
+        
+    }
 
 }
-
-
 
 doctype_js = {
     "Purchase Order": "public/js/purchase_order.js",

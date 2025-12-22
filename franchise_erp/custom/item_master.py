@@ -7,39 +7,51 @@ def get_next_item_no():
     return count + 1
 
 import frappe
-import re
-
-
-def get_silvet_code(silvet):
-    """
-    Silvet short code: first letter + middle letter
-    """
-    if not silvet or len(silvet) < 2:
-        return silvet.upper() if silvet else "XX"
-    mid_index = len(silvet) // 2
-    return (silvet[0] + silvet[mid_index]).upper()
-
-def get_department_code(department):
-    """
-    Simple department code:
-    - Take first letter
-    - If starts with number, include that
-    """
-    if not department:
-        return "X"
-    code = department[0].upper()
-    match = re.search(r'\d+', department)
-    if match:
-        code += match.group(0)
-    return code
-
-
-import frappe
-import re
 import random
+def get_item_group_code(value, label):
+    """
+    value can be Item Group name OR custom_display_name
+    """
 
+    if not value:
+        frappe.throw(f"{label} is empty")
+
+    # 1️⃣ Try direct name match (BEST case)
+    code = frappe.db.get_value(
+        "Item Group",
+        value,
+        "custom_code"
+    )
+
+    if code:
+        return code
+
+    # 2️⃣ Fallback: match by custom_display_name
+    code = frappe.db.get_value(
+        "Item Group",
+        {"custom_display_name": value},
+        "custom_code"
+    )
+
+    if code:
+        return code
+
+    # 3️⃣ Debug + hard error
+    frappe.log_error(
+        f"{label} Item Group not found.\nValue received: {value}",
+        "ITEM CODE DEBUG"
+    )
+
+    frappe.throw(
+        f"Custom Code missing in {label} Item Group: {value}"
+    )
+
+
+
+import re
 
 def generate_item_code(doc, method):
+
     watched_fields = [
         "custom_group_collection",
         "custom_departments",
@@ -61,24 +73,45 @@ def generate_item_code(doc, method):
     if not changed:
         return
 
-    # ---------------- REQUIRED FIELDS ----------------
+    # ---------------- REQUIRED ----------------
     collection = doc.custom_group_collection
     department = doc.custom_departments
     silvet = doc.custom_silvet
     colour = doc.custom_colour_code
-    size = doc.custom_size
 
     if not collection or not department or not silvet or not colour:
         frappe.throw("Please select Collection, Department, Silvet and Colour")
 
+    # ---------------- FETCH CODES (WITH DEBUG) ----------------
+    collection_code = get_item_group_code(collection, "COLLECTION")
+    department_code = get_item_group_code(department, "DEPARTMENT")
+    silvet_code = get_item_group_code(silvet, "SILVET")
+
+    # ---------------- DEBUG LOG ----------------
+    frappe.log_error(
+        f"""
+        COLLECTION : {collection} → {collection_code}
+        DEPARTMENT : {department} → {department_code}
+        SILVET     : {silvet} → {silvet_code}
+        COLOUR     : {colour}
+        """,
+        "ITEM CODE BUILD DEBUG"
+    )
+
+    # ---------------- VALIDATION ----------------
+    if not collection_code:
+        frappe.throw(f"Custom Code missing in Collection Item Group: {collection}")
+
+    if not department_code:
+        frappe.throw(f"Custom Code missing in Department Item Group: {department}")
+
+    if not silvet_code:
+        frappe.throw(f"Custom Code missing in Silvet Item Group: {silvet}")
+
     # ---------------- PREFIX BUILD ----------------
-    col_prefix = collection[0].upper()
-    silvet_code = get_silvet_code(silvet)
-    dept_short = get_department_code(department)
+    base_code = f"{collection_code}-{department_code}-{silvet_code}-{colour}"
 
-    base_code = f"{col_prefix}-{department.upper()}-{silvet_code}-{colour}"
-
-    # ---------------- NEXT SERIES (SAFE) ----------------
+    # ---------------- NEXT SERIES ----------------
     next_series = get_next_series(base_code)
 
     # ---------------- ITEM CODE ----------------
@@ -87,12 +120,11 @@ def generate_item_code(doc, method):
 
     doc.item_code = f"{base_code}-{next_series}"
 
-    # 🔒 FINAL DUPLICATE SAFETY (NO ERROR EVER)
     while frappe.db.exists("Item", doc.item_code):
         next_series += 1
         doc.item_code = f"{base_code}-{next_series}"
 
-    # ---------------- BARCODE (SAME AS ITEM CODE) ----------------
+    # ---------------- BARCODE ----------------
     doc.barcodes = []
     doc.append("barcodes", {
         "barcode": doc.item_code,
@@ -101,7 +133,6 @@ def generate_item_code(doc, method):
     })
 
     # ---------------- SERIAL NO SERIES ----------------
-    # TZU Setting is NOT Single → get any one record
     first_letter = frappe.db.get_value(
         "TZU Setting",
         {},
@@ -112,14 +143,6 @@ def generate_item_code(doc, method):
 
     doc.has_serial_no = 1
     doc.serial_no_series = f"{first_letter}{random_series}.#####"
-
-    frappe.logger().info(
-        f"Item Code: {doc.item_code} | Serial Series: {doc.serial_no_series}"
-    )
-
-
-# ------------------------------------------------------------------
-
 
 def get_next_series(base_code):
     """
@@ -144,74 +167,46 @@ def get_next_series(base_code):
     return 1
 
 
-# def get_department_code(department):
-#     """
-#     Department short code:
-#     - First letter
-#     - Agar number ho to include
-#     Example:
-#     KURTA → K
-#     KURTA-2 → K2
-#     """
-#     if not department:
-#         return "X"
+# silvet dropdown tree method
+@frappe.whitelist()
+def all_item_group_for_silvet(doctype, txt, searchfield, start, page_len, filters):
+    # Fetch only child items (is_group=0) and skip 'All Item Groups'
+    children = frappe.db.get_all(
+        "Item Group",
+        filters={"is_group": 0, "item_group_name": ["!=", "All Item Groups"]},
+        fields=["item_group_name", "parent_item_group"],
+        order_by="lft",
+        limit_start=start,
+        limit_page_length=page_len
+    )
 
-#     first = department[0].upper()
-#     match = re.search(r'\d+', department)
-#     number = match.group(0) if match else ""
+    # Preload all item groups to reduce DB hits
+    all_groups = frappe.db.get_all(
+        "Item Group",
+        fields=["item_group_name", "parent_item_group"]
+    )
+    parent_map = {g["item_group_name"]: g for g in all_groups}
 
-#     return f"{first}{number}"
+    def get_full_path(child_name):
+        """Return full path from root to child using item_group_name"""
+        path = []
+        current = child_name
+        max_levels = 10
+        level = 0
+        while current and level < max_levels:
+            label = parent_map.get(current, {}).get("item_group_name") or current
+            if label != "All Item Groups":
+                path.insert(0, label)  # prepend to path
+            parent = parent_map.get(current, {}).get("parent_item_group")
+            current = parent
+            level += 1
+        return " > ".join(path)
 
-# for tree
-# import frappe
-# from frappe import _
+    results = []
+    for c in children:
+        full_path = get_full_path(c["item_group_name"])
+        if not txt or txt.lower() in full_path.lower():
+            # value = item_group_name, label = full path
+            results.append([c["item_group_name"], full_path])
 
-# @frappe.whitelist()
-# @frappe.validate_and_sanitize_search_inputs
-# def item_group_query(doctype, txt, searchfield, start, page_len, filters=None):
-#     """
-#     Returns leaf item groups (is_group=0) with full hierarchy in the name for display.
-#     Format: Child > Parent > Parent
-#     """
-#     filters = filters or {}
-
-#     # Only leaf nodes
-#     conditions = ["is_group=0"]
-
-#     if filters.get("is_group") is not None:
-#         conditions.append(f"is_group = {int(filters.get('is_group'))}")
-
-#     # Get leaf nodes
-#     leaf_groups = frappe.db.sql(
-#         f"""
-#         SELECT name, parent_item_group
-#         FROM `tabItem Group`
-#         WHERE {searchfield} LIKE %(txt)s
-#         AND {" AND ".join(conditions)}
-#         ORDER BY name
-#         LIMIT %(page_len)s OFFSET %(start)s
-#         """,
-#         {
-#             "txt": "%%%s%%" % txt,
-#             "_txt": txt,
-#             "start": start,
-#             "page_len": page_len,
-#         },
-#         as_dict=1
-#     )
-
-#     result = []
-#     for group in leaf_groups:
-#         hierarchy = [group.name]
-#         parent = group.parent_item_group
-
-#         # Build parent chain
-#         while parent:
-#             hierarchy.append(parent)
-#             parent = frappe.db.get_value("Item Group", parent, "parent_item_group")
-
-#         # Reverse so that child > parent > parent
-#         display_name = " > ".join(hierarchy)
-#         result.append((group.name, display_name))  # first value used as actual Link
-
-#     return result
+    return results

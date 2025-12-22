@@ -90,11 +90,13 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "output_gst_min_net_rate",
    "fieldtype": "Float",
    "label": "Output GST 5%"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "output_gst_max_net_rate",
    "fieldtype": "Float",
    "label": "Output GST 18%"
@@ -104,7 +106,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-18 18:53:28.159524",
+ "modified": "2025-12-19 13:10:43.654492",
  "modified_by": "sis@sis.com",
  "module": "Franchise Erp",
  "name": "SIS Configuration",
