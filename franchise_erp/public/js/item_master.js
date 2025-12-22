@@ -58,155 +58,31 @@ frappe.ui.form.on('Item', {
 //         });
 //     }
 // });
-// frappe.ui.form.on('Item', {
-//     setup(frm) {
-//         frm.set_query("custom_silvet", function () {
-//             return {
-//                 query: "franchise_erp.custom.item_master.item_group_query",
-//                 filters: {
-//                     is_group: 0
-//                 }
-//             };
-//         });
-//     }
-// });
-
-
 
 
 frappe.ui.form.on('Item', {
-
     onload(frm) {
-        set_item_group_query(frm);
-    },
-    refresh(frm) {
-        set_item_group_query(frm);
+        frm.set_query("custom_silvet", function () {
+            return {
+                query: "franchise_erp.custom.item_group.get_child_item_groups"
+            };
+        });
     }
 });
+    // frappe.ui.form.on("Item", {
+    //     custom_silvet(frm) {
+    //         if (!frm.doc.custom_silvet) return;
 
-
-function set_item_group_query(frm) {
-    frm.set_query('custom_silvet', () => {
-        return {
-            query: 'franchise_erp.custom.item_group.all_item_group_for_silvet'
-        };
-    });
-}
-
-// frappe.ui.form.on('Item', {
-//     refresh(frm) {
-//         frm.add_custom_button('Print Label', () => {
-//             frappe.utils.print(
-//                 frm.doctype,
-//                 frm.docname,
-//                 "Garment Label"
-//             );
-//         });
-//     }
-// });
-
-
-
-
-// item code generate
-// frappe.ui.form.on("Item", {
-//     before_save(frm) {
-//         generate_item_code(frm);
-//     }
-// });
-
-// // Collection → F
-// function getCollectionCode(text) {
-//     if (!text) return "";
-//     return text.trim().toUpperCase()[0];
-// }
-
-// // Department → 3PC SET
-// function getDepartmentCode(text) {
-//     if (!text) return "";
-//     return text.trim().toUpperCase().replace(/\s+/g, " ");
-// }
-
-// // Silvet / Style → AK
-// function getStyleCode(text) {
-//     if (!text) return "";
-//     let words = text.trim().toUpperCase().split(" ");
-//     if (words.length >= 2) {
-//         return words[0][0] + words[1][0];
-//     }
-//     return text.substring(0, 2).toUpperCase();
-// }
-
-// // MAIN FUNCTION
-// function generate_item_code(frm) {
-
-//     // 🔹 EXACT SAME FIELDS as working console code
-//     let collection = frm.doc.custom_group_collection || "";
-//     let dept = frm.doc.custom_departments || "";
-//     let silvet = frm.doc.custom_silvet || "";
-//     let auto_no = frm.doc.custom_auto_no || 31;
-//     let colour_code = frm.doc.custom_colour_code || "MV";
-
-//     let final_code = `${getCollectionCode(collection)}-${getDepartmentCode(dept)}-${getStyleCode(silvet)}-${auto_no
-//         .toString()
-//         .padStart(3, "0")}-${colour_code}`;
-
-//     console.log("Generated Item Code:", final_code);
-
-//     frm.set_value("item_code", final_code);
-// }
-
-// frappe.ui.form.on("Item", {
-//     before_save(frm) {
-//         generate_item_code(frm);
-//     }
-// });
-
-// // Helper functions
-// function getCollectionCode(text) {
-//     if (!text) return "";
-//     return text.trim().toUpperCase()[0];
-// }
-
-// function getDepartmentCode(text) {
-//     if (!text) return "";
-//     return text.trim().toUpperCase().replace(/\s+/g, " ");
-// }
-
-// function getStyleCode(text) {
-//     if (!text) return "";
-//     let words = text.trim().toUpperCase().split(" ");
-//     if (words.length >= 2) {
-//         return words[0][0] + words[1][0];
-//     }
-//     return text.substring(0, 2).toUpperCase();
-// }
-
-// // MAIN FUNCTION
-// function generate_item_code(frm) {
-
-//     // New item ke liye hi auto_no generate karo
-//     if (!frm.is_new()) return;
-
-//     frappe.call({
-//         method: "franchise_erp.custom.item_master.get_next_item_no",
-//         callback: function (r) {
-//             if (!r.message) return;
-
-//             let auto_no = r.message; // 25
-//             let padded_no = auto_no.toString().padStart(3, "0"); // 025
-
-//             let collection = frm.doc.custom_group_collection || "";
-//             let dept = frm.doc.custom_departments || "";
-//             let silvet = frm.doc.custom_silvet || "";
-//             let colour_code = frm.doc.custom_colour_code || "MV";
-
-//             let final_code = `${getCollectionCode(collection)}-${getDepartmentCode(dept)}-${getStyleCode(silvet)}-${padded_no}-${colour_code}`;
-
-//             console.log("Generated Item Code:", final_code);
-
-//             frm.set_value("item_code", final_code);
-//         }
-//     });
-// }
+    //         frappe.db.get_value(
+    //             "Item Group",
+    //             frm.doc.custom_silvet,
+    //             "item_group_name",
+    //             (r) => {
+    //                 if (r) {
+    //                     frm.set_value("custom_silvet", r.item_group_name);
+    //                 }
+    //             }
+    //         );
+    //     }
+    // });
 

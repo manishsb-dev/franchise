@@ -1,5 +1,5 @@
-import frappe
 
+import frappe
 
 @frappe.whitelist()
 def get_item_group_parents(child_group):
@@ -10,102 +10,137 @@ def get_item_group_parents(child_group):
     }
 
     if not child_group:
-        frappe.logger().info(result)
         return result
 
-    # Level 1 → Kurta
+    def get_parent_name(group):
+        if not group:
+            return None
+        parent = frappe.db.get_value("Item Group", group, "parent_item_group")
+        if not parent:
+            return None
+        # return readable name
+        return frappe.db.get_value("Item Group", parent, "item_group_name")
+
+    # Level 1
+    result["department"] = get_parent_name(child_group)
+
+    # Level 2
     parent_1 = frappe.db.get_value("Item Group", child_group, "parent_item_group")
-    result["department"] = parent_1
+    result["collection"] = get_parent_name(parent_1)
 
-    # Level 2 → Summer
+    # Level 3
     parent_2 = frappe.db.get_value("Item Group", parent_1, "parent_item_group") if parent_1 else None
-    result["collection"] = parent_2
+    result["main_group"] = get_parent_name(parent_2)
 
-    # Level 3 → Womens Ethnic
-    parent_3 = frappe.db.get_value("Item Group", parent_2, "parent_item_group") if parent_2 else None
-    result["main_group"] = parent_3
-
-    frappe.logger().info(f"Item Group Parents: {result}")
+    frappe.logger().info(f"Item Group Parents (Names): {result}")
     return result
 
-@frappe.whitelist()
-def all_item_group_for_silvet(doctype, txt, searchfield, start, page_len, filters):
-    ItemGroup = frappe.qb.DocType("Item Group")
 
-    base_groups = (
-        frappe.qb.from_(ItemGroup)
-        .select(
-            ItemGroup.name,
-            ItemGroup.parent_item_group,
-            ItemGroup.lft
+import frappe
+import uuid
+
+
+def set_hash_name(doc, method=None):
+    """
+    Force unique DB name (hash based)
+    """
+    if not doc.name:
+        doc.name = uuid.uuid4().hex
+
+
+def validate_same_parent(doc, method=None):
+    """
+    Block same item_group_name OR same custom_code under same parent
+    Allow duplicates under different parent
+    """
+
+    parent = doc.parent_item_group or "All Item Groups"
+
+    # ---- NAME DUPLICATE CHECK ----
+    name_exists = frappe.db.exists(
+        "Item Group",
+        {
+            "parent_item_group": parent,
+            "item_group_name": doc.item_group_name,
+            "name": ["!=", doc.name]
+        }
+    )
+
+    if name_exists:
+        frappe.throw(
+            f"Item Group Name '{doc.item_group_name}' already exists under '{parent}'"
         )
-        .where(
-            ItemGroup.name.like(f"%{txt}%")
+
+    # ---- CUSTOM CODE DUPLICATE CHECK ----
+    if doc.custom_code:
+        code_exists = frappe.db.exists(
+            "Item Group",
+            {
+                "parent_item_group": parent,
+                "custom_code": doc.custom_code,
+                "name": ["!=", doc.name]
+            }
+        )
+
+        if code_exists:
+            frappe.throw(
+                f"Item Group Code '{doc.custom_code}' already exists under '{parent}'"
             )
-        .orderby(ItemGroup.lft)
-        .limit(page_len)
-        .offset(start)
-    ).run(as_dict=True)
-
-    def get_full_path(name):
-        path = []
-        while name:
-            parent = frappe.db.get_value(
-                "Item Group",
-                name,
-                "parent_item_group"
-            )
-            path.insert(0, name)
-            name = parent
-        del path[0]
-        return " -> ".join(path)
-
-    results = []
-    for g in base_groups:
-        label = get_full_path(g["name"])
-
-        if txt.lower() in label.lower():
-            results.append((g["name"], label))
-
-    return results
 
 
-# @frappe.whitelist()
-# def all_item_group_for_silvet(doctype, txt, searchfield, start, page_len, filters):
-#     ItemGroup = frappe.qb.DocType("Item Group")
 
-#     base_groups = (
-#         frappe.qb.from_(ItemGroup)
-#         .select(ItemGroup.name, ItemGroup.parent_item_group)
-#         .where(
-#             (ItemGroup.is_group == 0) &
-#             (ItemGroup.name.like(f"%{txt}%"))
-#         )
-#         .limit(page_len)
-#         .offset(start)
-#     ).run(as_dict=True)
 
-#     def get_full_path(name):
-#         path = []
-#         while name:
-#             parent = frappe.db.get_value(
-#                 "Item Group",
-#                 name,
-#                 "parent_item_group"
-#             )
-#             path.insert(0, name)
-#             name = parent
+def force_display_name(doc, method):
+    if not doc.custom_display_name and doc.item_group_name:
+        doc.custom_display_name = doc.item_group_name
 
-#         if path and path[0] == "All Item Groups":
-#             path.pop(0)
 
-#         return " → ".join(path)
+import frappe
 
-#     results = []
-#     for g in base_groups:
-#         results.append((
-#             g["name"],                
-#             get_full_path(g["name"])  
-#         ))
+@frappe.whitelist()
+def get_child_item_groups(doctype, txt, searchfield, start, page_len, filters):
 
-#     return results
+    item_groups = frappe.db.get_all(
+        "Item Group",
+        filters={
+            "is_group": 0,
+            "name": ["!=", "All Item Groups"],
+            "item_group_name": ["!=", "All Item Groups"]
+        },
+        fields=["name", "lft", "rgt", "item_group_name"],
+        order_by="lft"
+    )
+
+    result = []
+
+    for ig in item_groups:
+        label = get_item_group_path_limited(ig.name, max_parents=3)
+
+        if not txt or txt.lower() in label.lower():
+            # 👇 THIS FORMAT IS REQUIRED
+            result.append([
+                ig.name,   # value (saved)
+                label      # description (tree shown)
+            ])
+
+    return result[start:start + page_len]
+
+def get_item_group_path_limited(item_group, max_parents=3):
+
+    rows = frappe.db.sql("""
+        SELECT parent.item_group_name
+        FROM `tabItem Group` child
+        JOIN `tabItem Group` parent
+          ON parent.lft <= child.lft
+         AND parent.rgt >= child.rgt
+        WHERE child.name = %s
+        ORDER BY parent.lft
+    """, item_group, as_dict=True)
+
+    if not rows:
+        return ""
+
+    child = rows[-1]["item_group_name"]
+    parents = [r["item_group_name"] for r in rows[:-1]][-max_parents:]
+
+    return " > ".join(parents + [child])
