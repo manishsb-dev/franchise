@@ -29,9 +29,9 @@ app_license = "mit"
 
 
 doc_events = {
-    # "Purchase Order":{
-    #    "before_submit" : "franchise_erp.custom.po_serial_generator.apply_po_serials"
-    # },
+    "Purchase Order":{
+    #    "before_submit" : "franchise_erp.custom.purchase_order.create_po_serials"
+    },
    "Purchase Invoice": {
        "before_save": "franchise_erp.custom.purchase_invoice.apply_intercompany_gst",
        "validate": "franchise_erp.custom.purchase_invoice_hooks.apply_item_gst",
@@ -52,15 +52,18 @@ doc_events = {
     #     "on_submit": ["franchise_erp.custom.reset_custom_margins_si_pi.reset_custom_margins","franchise_erp.custom.sales_invoice_hooks.force_margin_totals_after_submit"],
     #     "on_update_after_submit":"franchise_erp.custom.reset_custom_margins_si_pi.reset_custom_margins"
     # },
+
    "Item": {
         "before_insert": "franchise_erp.custom.item_master.generate_item_code",
         "before_save": "franchise_erp.custom.item_master.generate_item_code",
     },
     "Item Group": {
         "validate": "franchise_erp.custom.item_group.validate_same_parent",
-        "before_insert": ["franchise_erp.custom.item_group.set_hash_name","franchise_erp.custom.item_group.force_display_name"],
-        
-    }
+        "before_insert": ["franchise_erp.custom.item_group.set_hash_name","franchise_erp.custom.item_group.force_display_name"],        
+    },
+    # "Item Group Tree": {
+    #     "validate": "franchise_erp.custom.item_group_tree.validate_unique_combination"
+    # }
 
 }
 
@@ -74,9 +77,16 @@ doctype_js = {
     "Incoming Logistics": "public/js/incoming_logistics.js",
     "Color": "public/js/colour_code.js",
     "Item": "public/js/item_master.js",
-    "Address":"public/js/address.js"
+    "Address":"public/js/address.js",
+    "Supplier":"public/js/supplier.js",
 }
 
+
+# franchise_erp/hooks.py
+
+# override_whitelisted_methods = {
+#     "frappe.desk.treeview.get_children": "franchise_erp.overrides.item_group_tree.get_children"
+# }
 
 # override_whitelisted_methods = {
 #     "franchise_erp.custom.customs.get_user_role_profiles": 
@@ -99,8 +109,10 @@ after_migrate = [
 
 # app_include_js = "public/js/back_date_disabled.js"
 
-app_include_js = ["/assets/franchise_erp/js/back_date_disabled.js"]
-
+app_include_js = [
+    "/assets/franchise_erp/js/back_date_disabled.js",
+      "/assets/franchise_erp/js/item_group_tree.js"
+    ]
 
 
 

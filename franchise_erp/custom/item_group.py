@@ -144,3 +144,43 @@ def get_item_group_path_limited(item_group, max_parents=3):
     parents = [r["item_group_name"] for r in rows[:-1]][-max_parents:]
 
     return " > ".join(parents + [child])
+
+
+
+
+
+
+
+
+
+# custom doctype
+import frappe
+
+def before_insert(doc, method):
+    """
+    User enters: Festive
+    System saves:
+      item_group_name = Festive__1, Festive__2 ...
+    Tree/UI shows only: Festive
+    """
+
+    if not doc.custom_display_name:
+        return
+
+    base = doc.custom_display_name.strip()
+
+    # find existing with same base
+    existing = frappe.db.sql(
+        """
+        SELECT item_group_name
+        FROM `tabItem Group`
+        WHERE item_group_name LIKE %s
+        """,
+        (base + "%",),
+        as_dict=True
+    )
+
+    if not existing:
+        doc.item_group_name = base
+    else:
+        doc.item_group_name = f"{base}__{len(existing)+1}"

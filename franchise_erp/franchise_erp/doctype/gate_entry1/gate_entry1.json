@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-12-08 15:52:05.518736",
+ "creation": "2025-12-24 19:59:40.508745",
  "default_view": "List",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -50,7 +50,8 @@
   "actual_weight",
   "others",
   "others_section",
-  "remarks"
+  "remarks",
+  "amended_from"
  ],
  "fields": [
   {
@@ -81,17 +82,10 @@
    "reqd": 1
   },
   {
-   "fieldname": "entry_no",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Entry No",
-   "read_only": 1
-  },
-  {
-   "fieldname": "consignor",
-   "fieldtype": "Link",
-   "label": "Consignor",
-   "options": "Supplier"
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1
   },
   {
    "fieldname": "transporter",
@@ -102,16 +96,10 @@
    "reqd": 1
   },
   {
-   "fieldname": "invoice_no",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Invoice No",
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date",
    "reqd": 1
-  },
-  {
-   "fieldname": "lr_document_no",
-   "fieldtype": "Data",
-   "label": "LR, Document No"
   },
   {
    "default": "Yes",
@@ -131,16 +119,10 @@
    "reqd": 1
   },
   {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "label": "Date",
-   "reqd": 1
-  },
-  {
-   "fieldname": "site",
+   "fieldname": "consignor",
    "fieldtype": "Link",
-   "label": "Site",
-   "options": "Address"
+   "label": "Consignor",
+   "options": "Supplier"
   },
   {
    "fieldname": "mode",
@@ -149,9 +131,39 @@
    "options": "Road\nAir\nWater"
   },
   {
-   "fieldname": "invoice_date",
-   "fieldtype": "Date",
-   "label": "Invoice Date",
+   "fieldname": "lr_document_no",
+   "fieldtype": "Data",
+   "label": "LR, Document No"
+  },
+  {
+   "default": "Issued",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Issued\nReceived\nPaid"
+  },
+  {
+   "fieldname": "column_break_cred",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "entry_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Entry No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "site",
+   "fieldtype": "Link",
+   "label": "Site",
+   "options": "Address"
+  },
+  {
+   "fieldname": "invoice_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Invoice No",
    "reqd": 1
   },
   {
@@ -160,11 +172,10 @@
    "label": "LR, Date"
   },
   {
-   "default": "Issued",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Issued\nReceived\nPaid"
+   "fieldname": "purchase_no",
+   "fieldtype": "Data",
+   "label": "Purchase No",
+   "read_only": 1
   },
   {
    "fieldname": "transport_information_section",
@@ -178,9 +189,8 @@
    "label": "Maintain Bale wise Qty"
   },
   {
-   "fieldname": "lr_quantity",
-   "fieldtype": "Data",
-   "label": "LR Quantity"
+   "fieldname": "section_break_rlzu",
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "received_qty",
@@ -203,17 +213,26 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Box",
-   "fieldname": "unit",
-   "fieldtype": "Link",
-   "label": "Unit",
-   "options": "UOM"
+   "fieldname": "lr_quantity",
+   "fieldtype": "Data",
+   "label": "LR Quantity"
   },
   {
    "fieldname": "station_to",
    "fieldtype": "Link",
    "label": "Station To",
    "options": "City"
+  },
+  {
+   "fieldname": "column_break_dmpn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Box",
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "UOM"
   },
   {
    "fieldname": "policy_no",
@@ -232,14 +251,9 @@
    "options": "Yes\nNo"
   },
   {
-   "fieldname": "actual_weight",
+   "fieldname": "charged_weight",
    "fieldtype": "Data",
-   "label": "Actual Weight"
-  },
-  {
-   "fieldname": "freight",
-   "fieldtype": "Data",
-   "label": "Freight"
+   "label": "Charged Weight"
   },
   {
    "fieldname": "declaration_amount",
@@ -256,19 +270,28 @@
    "label": "Rate"
   },
   {
-   "fieldname": "charged_weight",
+   "fieldname": "freight",
    "fieldtype": "Data",
-   "label": "Charged Weight"
-  },
-  {
-   "fieldname": "others",
-   "fieldtype": "Data",
-   "label": "Others"
+   "label": "Freight"
   },
   {
    "fieldname": "total_amount",
    "fieldtype": "Data",
    "label": "Total Amount"
+  },
+  {
+   "fieldname": "column_break_uyae",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "actual_weight",
+   "fieldtype": "Data",
+   "label": "Actual Weight"
+  },
+  {
+   "fieldname": "others",
+   "fieldtype": "Data",
+   "label": "Others"
   },
   {
    "fieldname": "others_section",
@@ -281,36 +304,24 @@
    "label": "Remarks"
   },
   {
-   "fieldname": "purchase_no",
-   "fieldtype": "Data",
-   "label": "Purchase No",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_cred",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_dmpn",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_uyae",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_rlzu",
-   "fieldtype": "Section Break"
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Gate Entry1",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-23 17:49:31.147312",
+ "modified": "2025-12-24 19:59:40.508745",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
- "name": "Incoming Logistics",
+ "name": "Gate Entry1",
  "naming_rule": "Autoincrement",
  "owner": "Administrator",
  "permissions": [
