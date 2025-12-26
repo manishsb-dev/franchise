@@ -334,50 +334,47 @@ app_include_js = [
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-fixtures = [
-    "Custom Field",
-    "Property Setter",
-    "Client Script",
-    "Server Script",
-    "City",
-    "State"
-]
+# fixtures = [
+#     "Custom Field",
+#     "Property Setter",
+#     "Client Script",
+#     "Server Script",
+#     "City",
+#     "State"
+# ]
 
 
+# fixtures = [
+#     {
+#         "dt": "Custom Field",
+#         "filters": [["name", "=", "User-company"]],
+#     }
+# ]
 fixtures = [
-    {
-        "dt": "Custom Field",
-        "filters": [["name", "=", "User-company"]],
-    }
-]
-fixtures = [
-
-        {"dt": "Workflow"}, 
-        {"dt": "Workflow State"},
-    {"dt": "Workflow Action Master"},
+        {"dt": "Property Setter"}
         ]
 
-fixtures = [
-    {
-        "dt": "DocType",
-        # "filters": [
-        #     ["module", "=", "Franchise Erp"],
-        #     ["custom", "=", 1]
-        # ]
-    }
-]
+# fixtures = [
+#     {
+#         "dt": "DocType",
+#         # "filters": [
+#         #     ["module", "=", "Franchise Erp"],
+#         #     ["custom", "=", 1]
+#         # ]
+#     }
+# ]
 
-fixtures = [
-    {
-        "dt": "State",
-        "filters": [
-            ["country", "=", "India"]
-        ]
-    },
-    {
-        "dt": "City",
-        # "filters": [
-        #     ["country", "=", "India"]
-        # ]
-    }
-]
+# fixtures = [
+#     {
+#         "dt": "State",
+#         "filters": [
+#             ["country", "=", "India"]
+#         ]
+#     },
+#     {
+#         "dt": "City",
+#         # "filters": [
+#         #     ["country", "=", "India"]
+#         # ]
+#     }
+# ]
