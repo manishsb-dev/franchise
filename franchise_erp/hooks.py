@@ -58,8 +58,7 @@ doc_events = {
         "before_save": "franchise_erp.custom.item_master.generate_item_code",
     },
     "Item Group": {
-        "validate": "franchise_erp.custom.item_group.validate_same_parent",
-        "before_insert": ["franchise_erp.custom.item_group.set_hash_name","franchise_erp.custom.item_group.force_display_name"],        
+        "validate": "franchise_erp.custom.item_group.validate_same_parent"
     },
     # "Item Group Tree": {
     #     "validate": "franchise_erp.custom.item_group_tree.validate_unique_combination"
