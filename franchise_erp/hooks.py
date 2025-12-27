@@ -60,7 +60,13 @@ doc_events = {
         "validate": "franchise_erp.custom.item_group.validate_same_parent",
         "before_insert": ["franchise_erp.custom.item_group.set_hash_name","franchise_erp.custom.item_group.force_display_name"],
         
-    }
+    },
+    "Supplier": {
+        "validate": "franchise_erp.custom.supplier.validate_supplier"
+    },
+    "Purchase Order": {
+        "validate": "franchise_erp.custom.purchase_order.validate_purchase_order"
+    },
 
 }
 
@@ -74,7 +80,9 @@ doctype_js = {
     "Incoming Logistics": "public/js/incoming_logistics.js",
     "Color": "public/js/colour_code.js",
     "Item": "public/js/item_master.js",
-    "Address":"public/js/address.js"
+    "Address":"public/js/address.js",
+    "Supplier": "public/js/supplier.js",
+    "Purchase Order": "public/js/purchase_order.js",
 }
 
 
