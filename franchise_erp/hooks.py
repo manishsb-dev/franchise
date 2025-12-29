@@ -72,7 +72,14 @@ doc_events = {
      "Gate Entry": {
         "on_submit": "franchise_erp.custom.gate_entry.on_submit",
         "on_cancel": "franchise_erp.custom.gate_entry.on_cancel"
-    }
+    },
+    "Supplier": {
+        "validate": "franchise_erp.custom.supplier.validate_supplier"
+    },
+    "Purchase Order": {
+        "validate": "franchise_erp.custom.purchase_order.validate_purchase_order"
+    },
+
 }
 
 

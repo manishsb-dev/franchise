@@ -6,5 +6,5 @@ def validate_supplier(doc, method):
         frappe.throw("Please select Agent")
 
     # If the Transporter checkbox is ticked, then the Transporter field should also be mandatory.
-    if doc.is_transporter and not doc.custom_transporter_supplier:
+    if doc.is_transporter and not doc.custom_transporter:
         frappe.throw("Please select Transporter")
