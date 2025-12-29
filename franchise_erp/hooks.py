@@ -42,7 +42,8 @@ doc_events = {
     },
    
    "Sales Invoice": {
-        "before_save": "franchise_erp.custom.sales_invoice.apply_sis_pricing"
+        "before_save": ["franchise_erp.custom.sales_invoice.apply_sis_pricing",
+        "franchise_erp.custom.promotional_scheme.apply_promotions"]
     },
     # "Sales Invoice": {
     #     "before_save": ["franchise_erp.custom.sales_invoice_hooks.before_save","franchise_erp.custom.reset_custom_margins_si_pi.reset_custom_margins"],
