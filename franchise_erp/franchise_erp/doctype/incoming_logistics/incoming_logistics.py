@@ -10,6 +10,7 @@ class IncomingLogistics(Document):
 
     def create_gate_entry_box_barcodes(self):
         qty = int(self.received_qty or 0)
+
         if qty <= 0:
             return
 
