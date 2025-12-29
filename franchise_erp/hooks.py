@@ -69,6 +69,7 @@ doc_events = {
 
 
 
+
 doctype_js = {
     "Purchase Order": "public/js/purchase_order.js",
     "Purchase Invoice": "public/js/purchase_invoice.js",

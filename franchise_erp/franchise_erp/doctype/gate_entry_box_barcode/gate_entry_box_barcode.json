@@ -19,6 +19,7 @@
    "label": "Incoming Logistics No",
    "reqd": 1
   },
+
   {
    "fieldname": "status",
    "fieldtype": "Select",
