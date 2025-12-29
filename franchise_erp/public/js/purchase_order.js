@@ -24,7 +24,7 @@ frappe.ui.form.on("Purchase Order", {
     supplier(frm) {
         if (!frm.doc.supplier) {
             frm.set_value("custom_agent_supplier", null);
-            frm.set_value("custom_transporter_supplier", null);
+            frm.set_value("custom_transporter", null);
             return;
         }
 
@@ -35,7 +35,7 @@ frappe.ui.form.on("Purchase Order", {
                 "custom_is_agent",
                 "is_transporter",
                 "custom_agent_supplier",
-                "custom_transporter_supplier"
+                "custom_transporter"
             ]
         ).then(r => {
             const d = r.message || {};
@@ -49,9 +49,9 @@ frappe.ui.form.on("Purchase Order", {
 
             // Transporter logic
             if (d.is_transporter) {
-                frm.set_value("custom_transporter_supplier", d.custom_transporter_supplier);
+                frm.set_value("custom_transporter", d.custom_transporter);
             } else {
-                frm.set_value("custom_transporter_supplier", null);
+                frm.set_value("custom_transporter", null);
             }
         });
     },
