@@ -79,34 +79,22 @@ frappe.ui.form.on('Item', {
         });
     }
 });
-// frappe.ui.form.on('Item', {
-//     setup: function(frm) {
-//         frm.fields_dict.custom_silvet.get_query = function(doc, cdt, cdn) {
-//             return {
-//                 query: "franchise_erp.custom.item_group.get_dropdown_options"
-//             }
-//         }
-//     }
-// });
 
-
-// end main code
-
-
-    // frappe.ui.form.on("Item", {
-    //     custom_silvet(frm) {
-    //         if (!frm.doc.custom_silvet) return;
-
-    //         frappe.db.get_value(
-    //             "Item Group",
-    //             frm.doc.custom_silvet,
-    //             "item_group_name",
-    //             (r) => {
-    //                 if (r) {
-    //                     frm.set_value("custom_silvet", r.item_group_name);
-    //                 }
-    //             }
-    //         );
-    //     }
-    // });
-
+frappe.ui.form.on("Item", {
+    refresh(frm) {
+        frm.set_query("custom_silvet", function () {
+            return {
+                filters: {
+                    custom_is_silhouette: 1
+                }
+            };
+        });
+        frm.set_query("item_group", function () {
+            return {
+                filters: {
+                    custom_is_division: 1
+                }
+            };
+        });
+    }
+});

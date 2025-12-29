@@ -19,7 +19,7 @@ def get_item_group_parents(child_group):
         if not parent:
             return None
         # return readable name
-        return frappe.db.get_value("Item Group", parent, "item_group_name")
+        return frappe.db.get_value("Item Group", parent, "name")
 
     # Level 1
     result["department"] = get_parent_name(child_group)

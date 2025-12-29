@@ -8,10 +8,8 @@ def get_next_item_no():
 
 import frappe
 import random
+
 def get_item_group_code(value, label):
-    """
-    value can be Item Group name OR custom_display_name
-    """
 
     if not value:
         frappe.throw(f"{label} is empty")
@@ -22,31 +20,8 @@ def get_item_group_code(value, label):
         value,
         "custom_code"
     )
-
     if code:
         return code
-
-    # 2️⃣ Fallback: match by custom_display_name
-    code = frappe.db.get_value(
-        "Item Group",
-        {"custom_display_name": value},
-        "custom_code"
-    )
-
-    if code:
-        return code
-
-    # 3️⃣ Debug + hard error
-    frappe.log_error(
-        f"{label} Item Group not found.\nValue received: {value}",
-        "ITEM CODE DEBUG"
-    )
-
-    frappe.throw(
-        f"Custom Code missing in {label} Item Group: {value}"
-    )
-
-
 
 import re
 
@@ -72,7 +47,8 @@ def generate_item_code(doc, method):
 
     if not changed:
         return
-
+    if not doc.is_stock_item:
+        return 
     # ---------------- REQUIRED ----------------
     collection = doc.custom_group_collection
     department = doc.custom_departments
@@ -80,12 +56,12 @@ def generate_item_code(doc, method):
     colour = doc.custom_colour_code
 
     if not collection or not department or not silvet or not colour:
-        frappe.throw("Please select Collection, Department, Silvet and Colour")
+        frappe.throw("Please select Collection, Department, Silhouette and Colour")
 
     # ---------------- FETCH CODES (WITH DEBUG) ----------------
     collection_code = get_item_group_code(collection, "COLLECTION")
     department_code = get_item_group_code(department, "DEPARTMENT")
-    silvet_code = get_item_group_code(silvet, "SILVET")
+    silvet_code = get_item_group_code(silvet, "SILVET")         
 
     # ---------------- DEBUG LOG ----------------
     frappe.log_error(
