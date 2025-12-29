@@ -18,18 +18,18 @@ frappe.ui.form.on("Gate Entry", {
                     incoming_logistics: frm.doc.incoming_logistics
                 },
                 callback: function(r) {
-                    frm.clear_table("box_barcodes");
+                    frm.clear_table("gate_entry_box_barcode");
 
                     if (r.message) {
                         r.message.forEach(row => {
-                            let child = frm.add_child("box_barcodes");
+                            let child = frm.add_child("gate_entry_box_barcode");
                             child.box_barcode = row.box_barcode;
                             child.incoming_logistics_no = row.incoming_logistics_no;
                             child.status = row.status;
                         });
                     }
 
-                    frm.refresh_field("box_barcodes");
+                    frm.refresh_field("gate_entry_box_barcode");
                 }
             });
         } else {
