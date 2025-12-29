@@ -33,7 +33,7 @@
   "section_break_nzss",
   "scan_barcode",
   "section_break_ejse",
-  "box_barcodes",
+  "gate_entry_box_barcode",
   "others_section",
   "remarks",
   "section_break_rsit",
@@ -209,13 +209,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "box_barcodes",
-   "fieldtype": "Table",
-   "label": "Box Barcode",
-   "options": "Gate Entry Box Barcode",
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_nzss",
    "fieldtype": "Section Break"
   },
@@ -224,13 +217,19 @@
    "fieldtype": "Data",
    "label": "Scan Barcode",
    "options": "Barcode"
+  },
+  {
+   "fieldname": "gate_entry_box_barcode",
+   "fieldtype": "Table",
+   "label": "Gate Entry Box Barcodes",
+   "options": "Gate Entry Box Barcode"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-27 15:47:36.286264",
+ "modified": "2025-12-29 15:06:22.948659",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "Gate Entry",
