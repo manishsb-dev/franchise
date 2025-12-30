@@ -2,7 +2,6 @@ import frappe
 from frappe.model.naming import make_autoname
 
 def generate_serials_on_po_submit(doc, method):
-    """PO Submit par Item Series ya Item Code ke hisaab se serial generate karna"""
     for item in doc.items:
 
         item_info = frappe.db.get_value("Item", item.item_code, ["has_serial_no", "serial_no_series"], as_dict=True)

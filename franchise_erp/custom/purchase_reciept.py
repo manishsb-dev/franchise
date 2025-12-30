@@ -16,7 +16,7 @@ def assign_serials_to_grn(doc, method):
             
             qty = int(item.qty)
             if qty > len(available):
-                frappe.throw(f"Row {item.idx}: PO mein sirf {len(available)} serials bache hain!")
+                frappe.throw(f"Row {item.idx}: Only {len(available)} serials are available in the PO!")
 
             selected = available[:qty]
             item.serial_no = "\n".join(selected)
