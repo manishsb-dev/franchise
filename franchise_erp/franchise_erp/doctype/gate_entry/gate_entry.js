@@ -160,37 +160,45 @@ function validate_not_future(frm, fieldname) {
 
 frappe.ui.form.on("Gate Entry", {
     refresh(frm) {
-        // Only Submitted Gate Entry
+        // Sirf Submitted Gate Entry par
         if (frm.doc.docstatus !== 1) return;
 
-        // Check if Purchase Order is linked
-        if (!frm.doc.purchase_order) {
-            frappe.msgprint("Purchase Order not linked with this Gate Entry");
-            return;
-        }
+        // PO mandatory
+        if (!frm.doc.purchase_order) return;
 
-        // Check if Purchase Receipt already exists
-        if (frm.doc.received_details && frm.doc.received_details.length > 0) {
-            // Don't show button if data already mapped
-            return;
-        }
+        frappe.db.get_doc("Purchase Order", frm.doc.purchase_order).then(po => {
+            let show_button = false;
 
-        frm.add_custom_button(
-            __("Create Purchase Receipt"),
-            () => {
-                frappe.call({
-                    method: "franchise_erp.franchise_erp.doctype.gate_entry.gate_entry.create_purchase_receipt",
-                    args: {
-                        gate_entry: frm.doc.name
-                    },
-                    callback(r) {
-                        if (r.message) {
-                            frappe.set_route("Form", "Purchase Receipt", r.message);
+            (po.items || []).forEach(item => {
+                let ordered_qty = flt(item.qty);
+                let received_qty = flt(item.received_qty);
+
+                // 🔥 Difference check
+                if (ordered_qty !== received_qty) {
+                    show_button = true;
+                }
+            });
+
+            if (!show_button) return;
+
+            frm.add_custom_button(
+                __("Create Purchase Receipt"),
+                () => {
+                    frappe.call({
+                        method: "franchise_erp.franchise_erp.doctype.gate_entry.gate_entry.create_purchase_receipt",
+                        args: {
+                            gate_entry: frm.doc.name
+                        },
+                        callback(r) {
+                            if (r.message) {
+                                frappe.set_route("Form", "Purchase Receipt", r.message);
+                            }
                         }
-                    }
-                });
-            },
-            __("Create")
-        );
+                    });
+                },
+                __("Create")
+            );
+        });
     }
 });
+

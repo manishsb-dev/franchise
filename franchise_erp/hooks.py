@@ -76,14 +76,6 @@ doc_events = {
     # "Supplier": {
     #     "validate": "franchise_erp.custom.supplier.validate_supplier"
     # },
-    
-    
- 
-     "Gate Entry": {
-        "on_submit": "franchise_erp.custom.gate_entry.on_submit",
-        "on_cancel": "franchise_erp.custom.gate_entry.on_cancel",
-         "after_insert": "franchise_erp.franchise_erp.doctype.gate_entry.gate_entry.set_document_no"
-    },
     "Product Bundle":{
         "after_insert":"franchise_erp.custom.product_bundle.set_product_bundle_series"
     }
