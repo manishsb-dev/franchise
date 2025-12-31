@@ -6,7 +6,41 @@ from frappe.model.document import Document
 
 
 class GateEntry(Document):
-    pass
+
+    def before_save(self):
+        """Set document_no as the doc name if not already set"""
+        if not self.document_no:
+            # Directly set in the doc to avoid extra DB call
+            self.document_no = self.name
+
+    def on_submit(self):
+        """Triggered when Gate Entry is submitted"""
+        if not self.incoming_logistics:
+            frappe.throw("Incoming Logistics is required")
+
+        il_doc = frappe.get_doc("Incoming Logistics", self.incoming_logistics)
+
+        # Update Incoming Logistics fields
+        il_doc.status = "Received"
+        il_doc.gate_entry_no = self.name
+
+        il_doc.save(ignore_permissions=True)
+        frappe.db.commit()  # Ensure changes are saved immediately
+
+    def on_cancel(self):
+        """Triggered when Gate Entry is cancelled"""
+        if not self.incoming_logistics:
+            return
+
+        il_doc = frappe.get_doc("Incoming Logistics", self.incoming_logistics)
+
+        # Revert Incoming Logistics fields
+        il_doc.status = "Issued"
+        il_doc.gate_entry_no = None
+
+        il_doc.save(ignore_permissions=True)
+        frappe.db.commit()
+
 
 # fetch box barcode list
 @frappe.whitelist()
@@ -30,51 +64,7 @@ def get_box_barcodes_for_gate_entry(incoming_logistics):
         ]
     )
 
-# after scan update status in doctype and table both
-import frappe
-
-# @frappe.whitelist()
-# def mark_box_barcode_received(incoming_logistics_no, box_barcode):
-#     if not incoming_logistics_no or not box_barcode:
-#         frappe.throw("Incoming Logistics No and Box Barcode are required")
-
-#     # Find exact matching record
-#     docname = frappe.db.get_value(
-#         "Gate Entry Box Barcode",
-#         {
-#             "incoming_logistics_no": incoming_logistics_no,
-#             "box_barcode": box_barcode
-#         },
-#         "name"
-#     )
-
-#     if not docname:
-#         frappe.throw("Barcode does not belong to this Incoming Logistics")
-
-#     current_status = frappe.db.get_value(
-#         "Gate Entry Box Barcode",
-#         docname,
-#         "status"
-#     )
-
-#     if current_status == "Received":
-#         frappe.throw("This box is already Received")
-
-#     # Update status
-#     frappe.db.set_value(
-#         "Gate Entry Box Barcode",
-#         docname,
-#         "status",
-#         "Received"
-#     )
-
-#     frappe.db.commit()
-
-#     return "UPDATED"
-
 #update status only for box barcode table
-import frappe
-
 @frappe.whitelist()
 def mark_box_barcode_received(box_barcode, incoming_logistics_no):
 
@@ -114,9 +104,8 @@ def mark_box_barcode_received(box_barcode, incoming_logistics_no):
 
 
 
-import frappe
-from frappe.model.mapper import get_mapped_doc
 
+from frappe.model.mapper import get_mapped_doc
 
 @frappe.whitelist()
 def create_purchase_receipt(gate_entry):
@@ -125,7 +114,16 @@ def create_purchase_receipt(gate_entry):
     if not gate_entry_doc.purchase_order:
         frappe.throw("Purchase Order is not linked in Gate Entry")
 
-    # 🔥 Map Purchase Order → Purchase Receipt
+    def update_item(source, target, source_parent):
+        remaining_qty = (source.qty or 0) - (source.received_qty or 0)
+
+        if remaining_qty <= 0:
+            return None   # ❌ item skip ho jayega
+
+        target.qty = remaining_qty
+        target.received_qty = remaining_qty
+        target.stock_qty = remaining_qty * (source.conversion_factor or 1)
+
     pr = get_mapped_doc(
         "Purchase Order",
         gate_entry_doc.purchase_order,
@@ -141,30 +139,19 @@ def create_purchase_receipt(gate_entry):
                 "field_map": {
                     "name": "purchase_order_item",
                     "parent": "purchase_order"
-                }
+                },
+                "postprocess": update_item,
+                "condition": lambda doc: (doc.qty or 0) > (doc.received_qty or 0)
             }
         }
     )
 
-    # 🔹 Custom Linking
+    # 🔗 Custom linking
     pr.custom_gate_entry = gate_entry_doc.name
     pr.posting_date = gate_entry_doc.date
     pr.set_posting_time = 1
-
-    # Optional but useful
     pr.supplier = gate_entry_doc.consignor
     pr.company = gate_entry_doc.owner_site
 
     pr.insert(ignore_permissions=True)
-
     return pr.name
-
-
-def set_document_no(doc, method):
-    if not doc.document_no:
-        frappe.db.set_value(
-            doc.doctype,
-            doc.name,
-            "document_no",
-            doc.name
-        )

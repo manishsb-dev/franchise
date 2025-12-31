@@ -39,36 +39,75 @@ def restore_serials_on_grn_cancel(doc, method):
             remaining = [s for s in used_list if s not in to_remove]
             frappe.db.set_value("Purchase Order Item", item.purchase_order_item, "custom_used_serials", "\n".join(remaining))
 
+
+# def on_submit(doc, method):
+#     if not doc.custom_gate_entry:
+#         return
+
+#     gate_entry = frappe.get_doc("Gate Entry", doc.custom_gate_entry)
+
+#     # 🔥 Clear old rows
+#     gate_entry.received_details = []
+
+#     # 🔢 Total Qty of Purchase Receipt
+#     total_qty = sum(item.qty for item in doc.items)
+
+#     # ➕ Append ONLY ONE ROW
+#     row = gate_entry.append("received_details", {})
+
+#     # Purchase Receipt info
+#     row.document_no = doc.name
+#     row.document_date = doc.posting_date
+#     row.item_qty = total_qty      # ✅ consolidated qty
+#     row.amounts = doc.total       # ✅ PR total amount
+
+#     # Gate Entry mapping
+#     row.entry_no = gate_entry.name
+#     row.entry_date = gate_entry.date
+#     row.ge_qty = gate_entry.lr_quantity
+
+#     # Optional: update header totals
+#     if hasattr(gate_entry, "total_qty"):
+#         gate_entry.total_qty = total_qty
+
+#     if hasattr(gate_entry, "total"):
+#         gate_entry.total = doc.total
+
+#     gate_entry.save(ignore_permissions=True)
+
+
 def on_submit(doc, method):
     if not doc.custom_gate_entry:
         return
 
     gate_entry = frappe.get_doc("Gate Entry", doc.custom_gate_entry)
 
-    # Clear old rows
-    gate_entry.received_details = []
+    # 🔢 Total Qty of Purchase Receipt
+    total_qty = sum(item.qty for item in doc.items)
 
-    for item in doc.items:
-        row = gate_entry.append("received_details", {})
+    # ➕ ALWAYS APPEND NEW ROW (NO CLEAR)
+    row = gate_entry.append("received_details", {})
 
-        # Purchase Receipt info
-        row.document_no = doc.name
-        row.document_date = doc.posting_date
-        row.item_qty = item.qty
+    # Purchase Receipt info
+    row.document_no = doc.name
+    row.document_date = doc.posting_date
+    row.item_qty = total_qty
+    row.amounts = doc.total
 
-        # Map PR total to Gate Entry amounts
-        row.amounts = doc.total  # total from Purchase Receipt
+    # Gate Entry mapping
+    row.entry_no = gate_entry.name
+    row.entry_date = gate_entry.date
+    row.ge_qty = gate_entry.lr_quantity
 
-        # Gate Entry mapping
-        row.entry_no = gate_entry.name    # ✅ This is a string like TPL-GE-00029-2025-2026
-        row.entry_date = gate_entry.date
-        row.ge_qty = gate_entry.lr_quantity
-
-    # Optional: update header fields in Gate Entry
+    # 🔢 Optional: update cumulative totals
     if hasattr(gate_entry, "total_qty"):
-        gate_entry.total_qty = sum([i.qty for i in doc.items])
+        gate_entry.total_qty = sum(
+            (d.item_qty or 0) for d in gate_entry.received_details
+        )
 
     if hasattr(gate_entry, "total"):
-        gate_entry.total = doc.total
+        gate_entry.total = sum(
+            (d.amounts or 0) for d in gate_entry.received_details
+        )
 
     gate_entry.save(ignore_permissions=True)
