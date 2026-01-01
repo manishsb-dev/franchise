@@ -54,7 +54,7 @@ doc_events = {
     },
     "Purchase Receipt": {
         "validate":"franchise_erp.custom.purchase_reciept.validate_item",
-        "before_submit": "franchise_erp.custom.purchase_reciept.assign_serials_from_po_on_submit",
+        "before_save": "franchise_erp.custom.purchase_reciept.assign_serials_from_po_on_submit",
         "on_submit": ["franchise_erp.custom.purchase_reciept.lock_serials_on_grn_submit",
                       "franchise_erp.custom.purchase_reciept.on_submit",
                       ],
