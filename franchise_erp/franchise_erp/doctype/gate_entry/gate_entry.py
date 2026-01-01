@@ -116,23 +116,27 @@ def create_purchase_receipt(gate_entry):
     def update_item(source, target, source_parent):
         remaining_qty = (source.qty or 0) - (source.received_qty or 0)
 
-        # ❌ Skip item if nothing left
+        # ❌ Nothing to receive
         if remaining_qty <= 0:
             return None
 
-        # ✅ Set qty
+        # ✅ Qty set
         target.qty = remaining_qty
         target.received_qty = remaining_qty
         target.stock_qty = remaining_qty * (source.conversion_factor or 1)
 
-        # ✅ FIX SERIAL NO ISSUE
-        if source.serial_no:
+        # ✅ SERIAL FIX (USING custom_generated_serials)
+        if source.custom_generated_serials:
             serial_list = [
-                s.strip() for s in source.serial_no.split("\n") if s.strip()
+                s.strip()
+                for s in source.custom_generated_serials.split("\n")
+                if s.strip()
             ]
 
-            # qty ke basis par serial_no trim karo
-            target.serial_no = "\n".join(serial_list[:int(remaining_qty)])
+            # Qty ke basis par serials lo
+            allowed_serials = serial_list[:int(remaining_qty)]
+
+            target.serial_no = "\n".join(allowed_serials)
         else:
             target.serial_no = None
 
@@ -157,6 +161,9 @@ def create_purchase_receipt(gate_entry):
             }
         }
     )
+
+    return pr
+
 
     # 🔗 Custom linking
     pr.custom_gate_entry = gate_entry_doc.name
