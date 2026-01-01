@@ -145,7 +145,7 @@
    "description": null,
    "docstatus": 0,
    "dt": "Purchase Order",
-   "fetch_from": null,
+   "fetch_from": "supplier.custom_purchase_terms_template",
    "fetch_if_empty": 0,
    "fieldname": "custom_purchase_term",
    "fieldtype": "Link",
