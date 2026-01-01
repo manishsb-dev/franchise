@@ -241,7 +241,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Draft\nSubmitted\nPartially Received\nFully Received\nCancelled"
+   "options": "\nDraft\nSubmitted\nPartially Received\nFully Received\nCancelled"
   }
  ],
  "grid_page_length": 50,
@@ -253,7 +253,7 @@
    "link_fieldname": "custom_gate_entry"
   }
  ],
- "modified": "2026-01-01 11:12:39.497983",
+ "modified": "2026-01-01 11:48:09.791853",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "Gate Entry",

@@ -40,18 +40,28 @@ class GateEntry(Document):
 
 
     def on_cancel(self):
-        """Triggered when Gate Entry is cancelled"""
-        if not self.incoming_logistics:
-            return
+    """Triggered when Gate Entry is cancelled"""
 
-        il_doc = frappe.get_doc("Incoming Logistics", self.incoming_logistics)
+    # ✅ Update Gate Entry status
+    if hasattr(self, "status"):
+        frappe.db.set_value(
+            self.doctype,
+            self.name,
+            "status",
+            "Cancelled"
+        )
 
-        # Revert Incoming Logistics fields
-        il_doc.status = "Issued"
-        il_doc.gate_entry_no = None
+    # 🔁 Revert Incoming Logistics
+    if not self.incoming_logistics:
+        return
 
-        il_doc.save(ignore_permissions=True)
-        frappe.db.commit()
+    il_doc = frappe.get_doc("Incoming Logistics", self.incoming_logistics)
+
+    il_doc.status = "Issued"
+    il_doc.gate_entry_no = None
+
+    il_doc.save(ignore_permissions=True)
+    frappe.db.commit()
 
 
 # fetch box barcode list
