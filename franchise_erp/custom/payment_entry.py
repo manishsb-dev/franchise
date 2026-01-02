@@ -12,17 +12,19 @@ def apply_early_payment_discount(doc, method):
 
         pi = frappe.get_doc("Purchase Invoice", ref.reference_name)
 
-        # Normalize dates before comparison
-        if getdate(doc.posting_date) > getdate(pi.due_date):
+        # ✅ Decide last eligible discount date
+        discount_upto_date = (
+            pi.custom_buffer_due_date or pi.due_date
+        )
+
+        # Normalize & compare dates
+        if getdate(doc.posting_date) > getdate(discount_upto_date):
             continue
 
         supplier = frappe.db.get_value(
             "Supplier",
             pi.supplier,
-            [
-                "custom_allow_cash_discount_",
-                "custom_applied_on"
-            ],
+            ["custom_allow_cash_discount_", "custom_applied_on"],
             as_dict=True
         )
 
@@ -34,12 +36,12 @@ def apply_early_payment_discount(doc, method):
         # ✅ Decide discount base
         if supplier.custom_applied_on == "Net Total":
             invoice_base = pi.net_total
-        elif supplier.custom_applied_on =="Grand Total": 
+        elif supplier.custom_applied_on == "Grand Total":
             invoice_base = pi.grand_total
         else:
-            return
+            continue
 
-        # ✅ Max discount allowed for this invoice
+        # ✅ Maximum discount allowed per invoice
         max_discount = invoice_base * discount_percent / 100
 
         already_used = pi.custom_cash_discount_applied or 0
@@ -48,7 +50,7 @@ def apply_early_payment_discount(doc, method):
         if remaining <= 0:
             continue
 
-        # ✅ Discount applies proportionally on payment
+        # ✅ Proportional discount on this payment
         eligible_base = ref.allocated_amount
         discount_on_payment = eligible_base * discount_percent / 100
 
@@ -57,7 +59,7 @@ def apply_early_payment_discount(doc, method):
         if discount <= 0:
             continue
 
-        # 🔒 Update PI tracking (atomic update)
+        # 🔒 Track discount usage (one-time, cumulative)
         pi.db_set(
             "custom_cash_discount_applied",
             already_used + discount,
@@ -66,6 +68,7 @@ def apply_early_payment_discount(doc, method):
 
         # 📘 Create Debit Note
         create_discount_debit_note(pi, discount)
+
 
 
 
