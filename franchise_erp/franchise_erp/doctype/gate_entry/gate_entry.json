@@ -38,7 +38,8 @@
   "others_section",
   "remarks",
   "section_break_rsit",
-  "received_details"
+  "received_details",
+  "amended_from"
  ],
  "fields": [
   {
@@ -223,6 +224,16 @@
    "fieldtype": "Select",
    "label": "Naming Series",
    "options": "TPL-GE-.#####.-.FY."
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Gate Entry",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
@@ -234,7 +245,7 @@
    "link_fieldname": "custom_gate_entry"
   }
  ],
- "modified": "2026-01-02 16:06:17.558382",
+ "modified": "2026-01-02 17:08:30.049832",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "Gate Entry",

@@ -262,3 +262,66 @@ def validate_item_from_so(doc, method=None):
                 f"Row {row.idx}: Entered Qty <b>{row.qty}</b> exceeds "
                 f"remaining Sales Order Qty <b>{remaining_qty}</b>"
             )
+
+
+
+
+
+
+
+
+#arpit
+@frappe.whitelist()
+def create_inter_company_purchase_receipt(sales_invoice):
+    si = frappe.get_doc("Sales Invoice", sales_invoice)
+
+    supplier = frappe.get_value(
+        "Supplier",
+        {"represents_company": si.company},
+        "name"
+    )
+
+    if not supplier:
+        frappe.throw("Internal Supplier not found")
+
+    pr = frappe.new_doc("Purchase Receipt")
+    pr.supplier = supplier
+    pr.company = si.represents_company
+    pr.set_posting_time = 1
+    pr.posting_date = si.posting_date
+    pr.posting_time = si.posting_time
+
+    # 🔗 Safe reference
+    pr.source_sales_invoice = si.name
+
+    # ✅ Customer/Company ka warehouse
+    target_warehouse = frappe.db.get_value(
+        "Company",
+        pr.company,
+        "custom_default_warehouse"
+    )
+
+    # 🔁 Fallback agar default na ho
+    if not target_warehouse:
+        target_warehouse = frappe.get_value(
+            "Warehouse",
+            {"company": pr.company, "is_group": 0},
+            "name"
+        )
+
+    if not target_warehouse:
+        frappe.throw(f"No warehouse found for company {pr.company}")
+
+    for item in si.items:
+        pr.append("items", {
+            "item_code": item.item_code,
+            "qty": item.qty,
+            "uom": item.uom,
+            "rate": item.rate,
+            "warehouse": target_warehouse
+        })
+
+    pr.insert()
+    # pr.submit()
+
+    return pr.name
