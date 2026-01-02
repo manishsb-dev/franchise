@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2026-01-02 15:21:24.673670",
+ "creation": "2026-01-02 15:56:41.487885",
  "default_view": "List",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -38,8 +38,7 @@
   "others_section",
   "remarks",
   "section_break_rsit",
-  "received_details",
-  "amended_from"
+  "received_details"
  ],
  "fields": [
   {
@@ -224,16 +223,6 @@
    "fieldtype": "Select",
    "label": "Naming Series",
    "options": "TPL-GE-.#####.-.FY."
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Gate Entry",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
   }
  ],
  "grid_page_length": 50,
@@ -245,7 +234,7 @@
    "link_fieldname": "custom_gate_entry"
   }
  ],
- "modified": "2026-01-02 15:25:01.551994",
+ "modified": "2026-01-02 16:06:17.558382",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "Gate Entry",
