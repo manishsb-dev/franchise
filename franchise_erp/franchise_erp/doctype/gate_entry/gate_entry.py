@@ -8,9 +8,7 @@ class GateEntry(Document):
     def before_save(self):
         if self.is_new() and not self.status:
             self.status = "Draft"
-
-
-
+            
     def on_submit(self):
         # 🔹 Submit par status
         self.status = "Submitted"
