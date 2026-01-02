@@ -297,3 +297,30 @@ function calculate_sis(frm, cdt, cdn) {
 
     });
 }
+
+
+
+// arpit
+frappe.ui.form.on('Sales Invoice', {
+    refresh(frm) {
+        if (frm.doc.docstatus === 1) {
+            frm.add_custom_button(
+                __('Inter Company GRN'),
+                function () {
+                    frappe.call({
+                        method: "franchise_erp.custom.sales_invoice.create_inter_company_purchase_receipt",
+                        args: {
+                            sales_invoice: frm.doc.name
+                        },
+                        callback(r) {
+                            if (r.message) {
+                                frappe.set_route("Form", "Purchase Receipt", r.message);
+                            }
+                        }
+                    });
+                },
+                __('Create')
+            );
+        }
+    }
+});
