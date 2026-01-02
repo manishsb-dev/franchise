@@ -1,8 +1,8 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "naming_series:",
- "creation": "2026-01-02 15:56:41.487885",
+ "autoname": "format:TPL-GE-{#####}-{FY}",
+ "creation": "2026-01-02 18:06:06.380355",
  "default_view": "List",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -21,7 +21,6 @@
   "site",
   "incoming_logistics",
   "purchase_order",
-  "naming_series",
   "section_break_rlzu",
   "lr_entry_no",
   "declaration_amount",
@@ -220,12 +219,6 @@
    "options": "\nDraft\nSubmitted\nPartially Received\nFully Received\nCancelled"
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Naming Series",
-   "options": "TPL-GE-.#####.-.FY."
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -243,13 +236,17 @@
   {
    "link_doctype": "Purchase Receipt",
    "link_fieldname": "custom_gate_entry"
+  },
+  {
+   "link_doctype": "Purchase Receipt",
+   "link_fieldname": "custom_bulk_gate_entry"
   }
  ],
- "modified": "2026-01-02 17:08:30.049832",
+ "modified": "2026-01-02 18:11:39.504904",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "Gate Entry",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
