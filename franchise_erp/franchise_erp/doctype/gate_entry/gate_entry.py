@@ -8,8 +8,8 @@ class GateEntry(Document):
 
     def before_save(self):
         if not self.status or self.docstatus == 0:
-    if self.status not in ["Submitted", "Cancelled"]:
-        self.status = "Draft"
+            if self.status not in ["Submitted", "Cancelled"]:
+                self.status = "Draft"
 
 
     def on_submit(self):
