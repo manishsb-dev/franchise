@@ -5,11 +5,10 @@ import frappe
 from frappe.model.document import Document
 
 class GateEntry(Document):
-
     def before_save(self):
-        if not self.status or self.docstatus == 0:
-            if self.status not in ["Submitted", "Cancelled"]:
-                self.status = "Draft"
+        if self.is_new() and not self.status:
+            self.status = "Draft"
+
 
 
     def on_submit(self):
