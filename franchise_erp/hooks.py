@@ -87,6 +87,9 @@ doc_events = {
     },
     "Payment Entry":{
         "on_submit":"franchise_erp.custom.payment_entry.apply_early_payment_discount"
+    },
+    "BOM": {
+        "on_submit": "franchise_erp.custom.bom.create_subcontracting_bom"
     }
 }
 
@@ -106,7 +109,8 @@ doctype_js = {
     "Product Bundle": "public/js/product_bundle.js",
     "Purchase Receipt":"public/js/purchase_receipt.js",
     "Sales Order":"public/js/sales_order.js",
-    "Customer":"public/js/customer.js"
+    "Customer":"public/js/customer.js",
+    "BOM":"public/js/bom.js"
 }
 
 

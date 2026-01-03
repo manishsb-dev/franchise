@@ -337,3 +337,41 @@ frappe.ui.form.on("Sales Invoice", {
     }
 });
 
+
+frappe.ui.form.on("Sales Invoice", {
+    customer: function (frm) {
+        calculate_due_date(frm);
+    },
+
+    posting_date: function (frm) {
+        if (frm.doc.customer) {
+            calculate_due_date(frm);
+        }
+    }
+});
+
+function calculate_due_date(frm) {
+    if (!frm.doc.customer || !frm.doc.posting_date) return;
+
+    frappe.db.get_value(
+        "Customer",
+        frm.doc.customer,
+        "custom_credit_days",
+        function (r) {
+            if (!r || r.custom_credit_days == null) return;
+
+            let days = cint(r.custom_credit_days);
+            let base_date = frm.doc.posting_date;
+
+            frappe.after_ajax(() => {
+                setTimeout(() => {
+                    // safety check
+                    if (!frm.doc.due_date || frm.is_new()) {
+                        let due_date = frappe.datetime.add_days(base_date, days);
+                        frm.set_value("due_date", due_date);
+                    }
+                }, 300);
+            });
+        }
+    );
+}
