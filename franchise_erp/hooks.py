@@ -90,6 +90,9 @@ doc_events = {
     },
     "BOM": {
         "on_submit": "franchise_erp.custom.bom.create_subcontracting_bom"
+    },
+    "Customer": {
+        "before_save": "franchise_erp.custom.customer.before_save"
     }
 }
 
