@@ -252,11 +252,9 @@ doctype_tree_js = {
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	# "ToDo": "custom_app.overrides.CustomToDo"
-#     "Item Group": "franchise_erp.overrides.item_group.CustomItemGroup"
-
-# }
+override_doctype_class = {
+    "Customer": "franchise_erp.custom.customer.CustomCustomer"
+}
 
 # Document Events
 # ---------------
