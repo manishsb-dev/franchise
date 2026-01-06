@@ -147,7 +147,10 @@ frappe.ui.form.on("Sales Invoice", {
 });
 
 function handle_inter_company_grn(frm) {
-    frm.remove_custom_button("Inter Company GRN", __("Create"));
+    // SAFELY clear only CREATE buttons
+    if (frm.page && frm.page.clear_custom_buttons) {
+        frm.page.clear_custom_buttons(__("Create"));
+    }
 
     if (frm.doc.docstatus === 1) {
         frm.add_custom_button(
@@ -155,7 +158,9 @@ function handle_inter_company_grn(frm) {
             () => {
                 frappe.call({
                     method: "franchise_erp.custom.sales_invoice.create_inter_company_purchase_receipt",
-                    args: { sales_invoice: frm.doc.name },
+                    args: {
+                        sales_invoice: frm.doc.name
+                    },
                     callback(r) {
                         if (r.message) {
                             frappe.set_route("Form", "Purchase Receipt", r.message);
@@ -168,8 +173,12 @@ function handle_inter_company_grn(frm) {
     }
 }
 
+
 function toggle_incoming_logistic_button(frm) {
-    frm.remove_custom_button("Incoming Logistic", __("Create"));
+    // SAFELY clear only CREATE buttons
+    if (frm.page && frm.page.clear_custom_buttons) {
+        frm.page.clear_custom_buttons(__("Create"));
+    }
 
     if (frm.doc.is_return) {
         frm.add_custom_button(
