@@ -29,7 +29,6 @@
   "print_",
   "import_",
   "section_break_urq2",
-  "amended_from",
   "amended_from"
  ],
  "fields": [
@@ -177,7 +176,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "NAFED Role Permission Manager",
+   "options": "TZU Role Permission Manager",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -187,7 +186,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "NAFED Role Permission Manager",
+   "options": "TZU Role Permission Manager",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -196,7 +195,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-06 21:26:20.026799",
+ "modified": "2026-01-06 21:46:19.838968",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "TZU Role Permission Manager",
