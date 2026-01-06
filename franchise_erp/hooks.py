@@ -76,8 +76,7 @@ doc_events = {
     },
     "Item Group": {
         "validate": "franchise_erp.custom.item_group.validate_same_parent",
-#         "before_insert": ["franchise_erp.custom.item_group.set_hash_name","franchise_erp.custom.item_group.force_display_name"],
-        
+        "autoname": "franchise_erp.custom.item_group.autoname"    
     },
     # "Supplier": {
     #     "validate": "franchise_erp.custom.supplier.validate_supplier"

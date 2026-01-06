@@ -235,3 +235,10 @@ def get_item_group_tree(doctype, parent):
         } for d in data
     ]
 
+
+def autoname(doc, method=None):
+    if doc.parent_item_group:
+        doc.name = f"{doc.parent_item_group}-{doc.item_group_name}"
+    else:
+        # Root node or system-created group
+        doc.name = doc.item_group_name
