@@ -101,6 +101,7 @@
    "options": "Supplier"
   },
   {
+   "fetch_from": "consignor.custom_transporter",
    "fieldname": "transporter",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -325,14 +326,12 @@
   {
    "fieldname": "lr_attachment",
    "fieldtype": "Attach",
-   "label": "LR Attachment",
-   "reqd": 1
+   "label": "LR Attachment"
   },
   {
    "fieldname": "sales_invoice_attachment",
    "fieldtype": "Attach",
-   "label": "Sales Invoice Attachment",
-   "reqd": 1
+   "label": "Sales Invoice Attachment"
   },
   {
    "fieldname": "naming_series",
@@ -363,7 +362,7 @@
    "link_fieldname": "incoming_logistics"
   }
  ],
- "modified": "2026-01-07 22:06:09.030873",
+ "modified": "2026-01-08 11:52:23.183355",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "Incoming Logistics",

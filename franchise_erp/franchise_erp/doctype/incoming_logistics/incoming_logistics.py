@@ -31,54 +31,43 @@ class IncomingLogistics(Document):
             po.save(ignore_permissions=True)
 
     def validate(self):
-    # Existing validation
+
         self.validate_unique_lr_per_transporter()
 
-        # ❗ Purchase Order now comes from CHILD TABLE
         if not self.purchase_order_id or not self.received_qty:
             return
 
-        # Collect unique Purchase Orders from child table
-        purchase_orders = {
-            row.purchase_order
-            for row in self.purchase_order_id
-            if row.purchase_order
-        }
+        total_po_qty = 0
+        po_details = []
 
-        # Safety check
-        if not purchase_orders:
-            return
+        # 🔹 Sum ALL PO item qty
+        for row in self.purchase_order_id:
+            if not row.purchase_order:
+                continue
 
-        # Assumption: One PO per Incoming Logistics
-        purchase_order = list(purchase_orders)[0]
+            po = frappe.get_doc("Purchase Order", row.purchase_order)
+            po_qty = sum(flt(item.qty) for item in po.items)
 
-        # 🔹 Fetch Purchase Order
-        po = frappe.get_doc("Purchase Order", purchase_order)
+            total_po_qty += po_qty
+            po_details.append(f"{row.purchase_order} → {po_qty}")
 
-        # 🔹 Total PO Quantity
-        po_total_qty = sum(flt(item.qty) for item in po.items)
-
-        # 🔹 Already received qty from PREVIOUS Incoming Logistics
-        already_received = frappe.db.sql("""
-            SELECT SUM(il.received_qty)
-            FROM `tabIncoming Logistics` il
-            INNER JOIN `tabPurchase Order ID` poi
-                ON poi.parent = il.name
-            WHERE poi.purchase_order = %s
-            AND il.docstatus = 1
-            AND il.name != %s
-        """, (purchase_order, self.name))[0][0] or 0
-
-        # 🔹 Total including current document
-        total_received = already_received + flt(self.received_qty)
+        # 🔹 ONLY current document received qty
+        current_received = flt(self.received_qty)
 
         # ❌ Validation
-        if total_received > po_total_qty:
+        if current_received > total_po_qty:
             frappe.throw(
-                f"Received Qty ({total_received}) cannot be greater than "
-                f"Purchase Order Qty ({po_total_qty})"
-            )
+                f"""
+                ❌ <b>Received Qty Invalid</b><br><br>
 
+                <b>Purchase Order Qty:</b><br>
+                {'<br>'.join(po_details)}<br><br>
+
+                <b>Total PO Qty:</b> {total_po_qty}<br>
+                <b>Entered Received Qty:</b> {current_received}<br><br>
+
+                """
+            )
 
 
     def before_submit(self):
