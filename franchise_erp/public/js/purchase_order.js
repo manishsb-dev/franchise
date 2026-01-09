@@ -85,3 +85,20 @@ frappe.ui.form.on("Purchase Order", {
         );
     }
 });
+
+
+frappe.ui.form.on('Purchase Order', {
+    company: function(frm) {
+        if (!frm.doc.company) return;
+
+        // 🟢 Fetch the warehouse from SIS Configuration for the selected company
+        frappe.db.get_value('SIS Configuration', { company: frm.doc.company }, 'warehouse')
+            .then(r => {
+                if (r.message && r.message.warehouse) {
+                    // 🟢 Set the warehouse in the Purchase Order field
+                    frm.set_value('set_warehouse', r.message.warehouse);
+                }
+            });
+    }
+});
+

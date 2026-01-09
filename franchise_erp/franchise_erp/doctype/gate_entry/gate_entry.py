@@ -166,20 +166,37 @@ def get_gate_entry_with_pos(supplier=None):
 
     return result
 
+
 @frappe.whitelist()
-def get_po_items(purchase_order):
+def get_po_items_from_gate_entry(gate_entry):
+
+    ge = frappe.get_doc("Gate Entry", gate_entry)
+
+    po_list = [
+        row.purchase_order
+        for row in ge.purchase_order_id
+        if row.purchase_order
+    ]
+
+    if not po_list:
+        return []
+
     po_items = frappe.get_all(
         "Purchase Order Item",
-        filters={"parent": purchase_order},
+        filters={
+            "parent": ["in", po_list]
+        },
         fields=[
-            "name",          # PO Item name (needed for link)
+            "name",
+            "parent as purchase_order",
             "item_code",
             "item_name",
             "stock_uom",
-            "conversion_factor",
-            "rate",         # ✅ add this
             "uom",
+            "conversion_factor",
+            "rate",
             "warehouse"
         ]
     )
+
     return po_items
