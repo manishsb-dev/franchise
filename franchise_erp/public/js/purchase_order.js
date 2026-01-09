@@ -102,3 +102,14 @@ frappe.ui.form.on('Purchase Order', {
     }
 });
 
+frappe.ui.form.on("Purchase Order", {
+    setup(frm) {
+        frm.set_query("custom_purchase_term", function () {
+            return {
+                filters: {
+                    active: 1
+                }
+            };
+        });
+    }
+});

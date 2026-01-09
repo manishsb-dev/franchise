@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2026-01-02 15:56:40.915759",
  "default_view": "List",
@@ -177,7 +176,8 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Issued\nReceived\nPaid"
+   "options": "Issued\nReceived\nPaid",
+   "read_only": 1
   },
   {
    "fieldname": "transport_information_section",
