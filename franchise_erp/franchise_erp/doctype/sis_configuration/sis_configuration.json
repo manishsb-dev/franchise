@@ -18,7 +18,9 @@
   "from_date",
   "to_date",
   "output_gst_min_net_rate",
-  "output_gst_max_net_rate"
+  "output_gst_max_net_rate",
+  "column_break_dbci",
+  "warehouse"
  ],
  "fields": [
   {
@@ -117,13 +119,23 @@
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date"
+  },
+  {
+   "fieldname": "column_break_dbci",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-08 17:38:34.095899",
+ "modified": "2026-01-09 13:49:12.508031",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "SIS Configuration",

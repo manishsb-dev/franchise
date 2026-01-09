@@ -135,24 +135,29 @@ frappe.ui.form.on("Purchase Receipt", {
         });
     }
 });
-function map_gate_entry_to_purchase_receipt(frm, gate_entry, purchase_order) {
 
-    // 🧹 Remove default empty row (only once)
-    if (
-        frm.doc.items &&
-        frm.doc.items.length === 1 &&
-        !frm.doc.items[0].item_code
-    ) {
+
+function map_gate_entry_to_purchase_receipt(frm, gate_entry) {
+
+    // 🧹 Remove default empty row only once
+    if (frm.doc.items?.length === 1 && !frm.doc.items[0].item_code) {
         frm.clear_table("items");
     }
 
     frappe.call({
-        method: "franchise_erp.franchise_erp.doctype.gate_entry.gate_entry.get_po_items",
+        method: "franchise_erp.franchise_erp.doctype.gate_entry.gate_entry.get_po_items_from_gate_entry",
         args: {
-            purchase_order: purchase_order
+            gate_entry: gate_entry
         },
-        callback: function (res) {
-            (res.message || []).forEach(item => {
+        callback(res) {
+            const items = res.message || [];
+
+            if (!items.length) {
+                frappe.msgprint(__("No items found for Gate Entry {0}", [gate_entry]));
+                return;
+            }
+
+            items.forEach(item => {
                 let row = frm.add_child("items");
 
                 row.item_code = item.item_code;
@@ -163,11 +168,11 @@ function map_gate_entry_to_purchase_receipt(frm, gate_entry, purchase_order) {
                 row.rate = item.rate;
                 row.warehouse = item.warehouse;
 
-                // 🔗 PO links
-                row.purchase_order = purchase_order;
+                // 🔗 Proper PO linking
+                row.purchase_order = item.purchase_order;
                 row.purchase_order_item = item.name;
 
-                // ✅ Gate Entry mapping
+                // 🔗 Gate Entry link
                 row.custom_bulk_gate_entry = gate_entry;
             });
 
@@ -175,8 +180,8 @@ function map_gate_entry_to_purchase_receipt(frm, gate_entry, purchase_order) {
         }
     });
 }
-
 function open_gate_entry_mapper(frm) {
+
     if (!frm.doc.supplier) {
         frappe.throw({
             title: __("Mandatory"),
@@ -184,120 +189,41 @@ function open_gate_entry_mapper(frm) {
         });
     }
 
-    frappe.call({
-        method: "franchise_erp.franchise_erp.doctype.gate_entry.gate_entry.get_gate_entry_with_pos",
-        args: { supplier: frm.doc.supplier },
-        callback: function (res) {
-            const data = res.message || [];
+    let dialog = new frappe.ui.form.MultiSelectDialog({
+        doctype: "Gate Entry",
+        target: frm,
 
-            if (!data.length) {
-                frappe.msgprint(__("No Gate Entries found for this supplier"));
+        setters: {
+            consignor: frm.doc.supplier
+        },
+
+        get_query() {
+            return {
+                filters: {
+                    consignor: frm.doc.supplier,
+                    docstatus: 1
+                }
+            };
+        },
+
+        columns: [
+            { fieldname: "name", label: __("Gate Entry ID"), fieldtype: "Data" }
+        ],
+
+        action(selections) {
+
+            if (!selections || !selections.length) {
+                frappe.msgprint(__("Please select at least one Gate Entry"));
                 return;
             }
 
-            // 🔹 Group data by Gate Entry
-            const grouped = {};
-            data.forEach(row => {
-                if (!grouped[row.gate_entry]) {
-                    grouped[row.gate_entry] = {
-                        owner_site: row.owner_site,
-                        pos: []
-                    };
-                }
-                grouped[row.gate_entry].pos.push(row.purchase_order);
+            // ✅ SINGLE call per Gate Entry
+            selections.forEach(gate_entry => {
+                map_gate_entry_to_purchase_receipt(frm, gate_entry);
             });
 
-            // 🔹 Build HTML rows
-            let table_rows = '';
-            Object.keys(grouped).forEach(ge => {
-                grouped[ge].pos.forEach((po, idx) => {
-                    table_rows += `
-                        <tr data-gate-entry="${ge}">
-                            <td>
-                                <input type="checkbox" 
-                                    class="ge-select" 
-                                    data-gate-entry="${ge}" 
-                                    data-po="${po}">
-                            </td>
-                            <td>${idx === 0 ? ge : ''}</td>
-                            <td>${po}</td>
-                            <td>${grouped[ge].owner_site || ""}</td>
-                        </tr>
-                    `;
-                });
-            });
-
-            const d = new frappe.ui.Dialog({
-                title: __('Select Purchase Order'),
-                fields: [
-                    {
-                        fieldtype: 'Link',
-                        fieldname: 'gate_entry_filter',
-                        label: 'Gate Entry',
-                        options: 'Gate Entry',
-                        onchange: function () {
-                            const selected_ge = d.get_value('gate_entry_filter');
-
-                            $(d.body).find('tbody tr').each(function () {
-                                if (!selected_ge || $(this).data('gate-entry') === selected_ge) {
-                                    $(this).show();
-                                } else {
-                                    $(this).hide();
-                                }
-                            });
-                        }
-                    },
-                    {
-                        fieldtype: 'HTML',
-                        fieldname: 'po_table',
-                        options: `
-                            <div style="max-height: 400px; overflow-y: auto;">
-                                <table class="table table-bordered table-condensed">
-                                    <thead>
-                                        <tr>
-                                            <th>Select</th>
-                                            <th>Gate Entry ID</th>
-                                            <th>Purchase Order ID</th>
-                                            <th>Owner Site</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${table_rows}
-                                    </tbody>
-                                </table>
-                            </div>
-                        `
-                    }
-                ],
-                primary_action_label: __('Get Items'),
-                primary_action: function () {
-                    const selected = [];
-
-                    $(d.body).find('.ge-select:checked').each(function () {
-                        selected.push({
-                            gate_entry: $(this).data('gate-entry'),
-                            purchase_order: $(this).data('po')
-                        });
-                    });
-
-                    if (!selected.length) {
-                        frappe.msgprint(__('Please select at least one Purchase Order'));
-                        return;
-                    }
-
-                    selected.forEach(row => {
-                        map_gate_entry_to_purchase_receipt(
-                            frm,
-                            row.gate_entry,
-                            row.purchase_order
-                        );
-                    });
-
-                    d.hide();
-                }
-            });
-
-            d.show();
+            // 🔹 Close the popup after processing
+            dialog.dialog.hide();
         }
     });
 }

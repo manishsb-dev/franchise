@@ -228,7 +228,7 @@
    "fieldname": "purchase_order_id",
    "fieldtype": "Table",
    "label": "Purchase Order ID",
-   "options": "Purchase Order ID"
+   "options": "Purchase  ID"
   }
  ],
  "grid_page_length": 50,
@@ -240,7 +240,7 @@
    "link_fieldname": "custom_bulk_gate_entry"
   }
  ],
- "modified": "2026-01-09 11:20:52.304081",
+ "modified": "2026-01-09 13:40:30.838145",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "Gate Entry",
