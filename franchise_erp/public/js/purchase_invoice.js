@@ -55,11 +55,11 @@ frappe.ui.form.on('Purchase Invoice', {
         }
 
         // Return PI: owner cannot submit
-        if (is_return === 1 && current_user === owner) {
-            frappe.msgprint("Supplier cannot submit Return Purchase Invoice");
-            frappe.validated = false;
-            return;
-        }
+        // if (is_return === 1 && current_user === owner) {
+        //     frappe.msgprint("Supplier cannot submit Return Purchase Invoice");
+        //     frappe.validated = false;
+        //     return;
+        // }
     }
 });
 
@@ -166,3 +166,27 @@ frappe.ui.form.on("Purchase Invoice", {
         frm.set_df_property("title", "read_only", 1);
     }
 });
+
+
+
+
+frappe.ui.form.on("Purchase Invoice", {
+    refresh(frm) {
+        toggle_bill_fields(frm);
+    },
+    is_return(frm) {
+        toggle_bill_fields(frm);
+    }
+});
+
+function toggle_bill_fields(frm) {
+    if (frm.doc.is_return) {
+        // Purchase Return → NOT mandatory
+        frm.set_df_property("bill_no", "reqd", 0);
+        frm.set_df_property("bill_date", "reqd", 0);
+    } else {
+        // Normal Purchase Invoice → Mandatory
+        frm.set_df_property("bill_no", "reqd", 1);
+        frm.set_df_property("bill_date", "reqd", 1);
+    }
+}
