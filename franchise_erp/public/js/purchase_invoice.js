@@ -160,3 +160,9 @@ function calculate_due_date(frm) {
         });
     });
 }
+
+frappe.ui.form.on("Purchase Invoice", {
+    refresh(frm) {
+        frm.set_df_property("title", "read_only", 1);
+    }
+});

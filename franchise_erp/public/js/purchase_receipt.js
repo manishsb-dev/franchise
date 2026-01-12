@@ -227,3 +227,9 @@ function open_gate_entry_mapper(frm) {
         }
     });
 }
+
+frappe.ui.form.on("Purchase Receipt", {
+    refresh(frm) {
+        frm.set_df_property("title", "read_only", 1);
+    }
+});

@@ -121,7 +121,8 @@ doctype_js = {
     "Purchase Receipt":"public/js/purchase_receipt.js",
     "Sales Order":"public/js/sales_order.js",
     "Customer":"public/js/customer.js",
-    "BOM":"public/js/bom.js"
+    "BOM":"public/js/bom.js",
+    "Delivery Note": "public/js/delivery_note.js"
 }
 
 
@@ -157,7 +158,8 @@ app_include_js = [
     "/assets/franchise_erp/js/item_group_overrides.js",
     "/assets/franchise_erp/js/session_company.js?v=120",
     "/assets/franchise_erp/js/customer_quick_entry.js",
-    "/assets/franchise_erp/js/customer_quick_entry_patch.js"
+    "/assets/franchise_erp/js/customer_quick_entry_patch.js",
+    "/assets/franchise_erp/js/doctype_overrides.js"
     ]
 
    
