@@ -124,3 +124,26 @@ frappe.ui.form.on("Item", {
         frm.set_df_property("title", "read_only", 1);
     }
 });
+
+
+//for item price Row
+frappe.ui.form.on("Item", {
+    item_code(frm) {
+        // Jab item code change ho, sab rows update ho jaye
+        (frm.doc.custom_item_prices || []).forEach(row => {
+            row.item_code = frm.doc.item_code;
+        });
+        frm.refresh_field("custom_item_prices");
+    }
+});
+
+frappe.ui.form.on("Item Price Row", {
+    custom_item_prices_add(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+
+        // Current item ka code auto fill
+        row.item_code = frm.doc.item_code;
+
+        frm.refresh_field("custom_item_prices");
+    }
+});
