@@ -233,3 +233,71 @@ def all_item_group_for_silvet(doctype, txt, searchfield, start, page_len, filter
             results.append([c["item_group_name"], full_path])
 
     return results
+
+#for existing item price validation error
+# def existing_item_price_update(doc, method):
+
+#     for row in doc.custom_item_prices or []:
+#         if not row.price_list or not row.rate:
+#             continue
+
+#         # Check existing Item Price
+#         item_price = frappe.db.exists(
+#             "Item Price",
+#             {
+#                 "item_code": doc.item_code,
+#                 "price_list": row.price_list
+#             }
+#         )
+
+#         if item_price:
+#             ip = frappe.get_doc("Item Price", item_price)
+#             ip.price_list_rate = row.rate
+#             ip.save(ignore_permissions=True)
+#         else:
+#             frappe.get_doc({
+#                 "doctype": "Item Price",
+#                 "item_code": doc.item_code,
+#                 "price_list": row.price_list,
+#                 "price_list_rate": row.rate
+#             }).insert(ignore_permissions=True)
+
+#for existing item price no validation
+import frappe
+
+def existing_item_price_update(doc, method):
+
+    for row in doc.custom_item_prices or []:
+
+        if not row.price_list or not row.rate:
+            continue
+
+        item_price_name = frappe.db.get_value(
+            "Item Price",
+            {
+                "item_code": doc.item_code,
+                "price_list": row.price_list,
+                "uom": doc.stock_uom
+            },
+            "name"
+        )
+
+        if item_price_name:
+            frappe.db.set_value(
+                "Item Price",
+                item_price_name,
+                "price_list_rate",
+                row.rate
+            )
+        else:
+            frappe.get_doc({
+                "doctype": "Item Price",
+                "item_code": doc.item_code,
+                "price_list": row.price_list,
+                "uom": doc.stock_uom,
+                "price_list_rate": row.rate
+            }).insert(ignore_permissions=True)
+
+    # Very important
+    frappe.clear_document_cache("Item Price")
+    frappe.clear_cache()
