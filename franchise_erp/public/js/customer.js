@@ -25,32 +25,66 @@ frappe.ui.form.on("Customer", {
         apply_company_credit_rules(frm);
         set_required_fields(frm);
     },
+    onload_post_render(frm) {
+        //  EDIT FULL FORM FIX
+        set_required_fields(frm);
+        apply_company_credit_rules(frm);
+    },
 
     refresh(frm) {
+        set_required_fields(frm);
         apply_company_credit_rules(frm);
     },
 
     custom_company(frm) {
-        apply_company_credit_rules(frm);
         set_required_fields(frm);
+        apply_company_credit_rules(frm);
+        
     }
 });
 
 
 
 function set_required_fields(frm) {
+    // 🔒 form / fields ready hone ke baad hi run ho
+    if (!frm.fields_dict.custom_transporter) return;
+
     if (!frm.doc.custom_company) {
-        frm.set_df_property("custom_transporter", "reqd", 0);
-        frm.set_df_property("custom_mobile_no_customer", "reqd", 0);
+        setTimeout(() => {
+            frm.set_df_property("custom_transporter", "reqd", 0);
+            frm.toggle_display("custom_transporter", 0);
+
+            frm.set_df_property("custom_mobile_no_customer", "reqd", 0);
+            frm.toggle_display("custom_mobile_no_customer", 1);
+
+            frm.refresh_field("custom_transporter");
+            frm.refresh_field("custom_mobile_no_customer");
+        }, 0);
         return;
     }
 
     frappe.db.get_value("Company", frm.doc.custom_company, "is_group")
         .then(r => {
-            const is_group = r.message.is_group;
+            const is_group = r.message?.is_group;
 
-            frm.set_df_property("custom_transporter", "reqd", is_group ? 1 : 0);
-            frm.set_df_property("custom_mobile_no_customer", "reqd", is_group ? 0 : 1);
+            setTimeout(() => {
+                frm.set_df_property(
+                    "custom_transporter",
+                    "reqd",
+                    is_group ? 1 : 0
+                );
+                frm.toggle_display("custom_transporter", is_group);
+
+                frm.set_df_property(
+                    "custom_mobile_no_customer",
+                    "reqd",
+                    is_group ? 0 : 1
+                );
+                frm.toggle_display("custom_mobile_no_customer", !is_group);
+
+                frm.refresh_field("custom_transporter");
+                frm.refresh_field("custom_mobile_no_customer");
+            }, 0);
         });
 }
 
