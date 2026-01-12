@@ -118,3 +118,9 @@ frappe.ui.form.on('Item', {
         }
     }
 });
+
+frappe.ui.form.on("Item", {
+    refresh(frm) {
+        frm.set_df_property("title", "read_only", 1);
+    }
+});
