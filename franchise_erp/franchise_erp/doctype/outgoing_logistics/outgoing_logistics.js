@@ -62,3 +62,103 @@ function open_sales_invoice_mapper(frm) {
 }
     });
 }
+
+frappe.ui.form.on("Outgoing Logistics", {
+
+    onload: function (frm) {
+        // When doc is created from another document
+        if (frm.doc.owner_site && !frm.doc.station_from) {
+            set_station_from_company(frm);
+        }
+
+        if (frm.doc.consignee && !frm.doc.station_to) {
+            set_station_to_customer(frm);
+        }
+    },
+
+    // STATION FROM → COMPANY
+    owner_site: function (frm) {
+        set_station_from_company(frm);
+    },
+
+    // STATION TO → CUSTOMER
+    consignee: function (frm) {
+        set_station_to_customer(frm);
+    }
+});
+
+
+/* ------------------------------
+   Helper functions
+------------------------------ */
+
+function set_station_from_company(frm) {
+    if (!frm.doc.owner_site) {
+        frm.set_value("station_from", "");
+        return;
+    }
+
+    frappe.db.get_list("Address", {
+        filters: [
+            ["Dynamic Link", "link_doctype", "=", "Company"],
+            ["Dynamic Link", "link_name", "=", frm.doc.owner_site]
+        ],
+        fields: ["name", "custom_citytown"],
+        limit: 1
+    }).then(addresses => {
+        if (!addresses || !addresses.length) {
+            frm.set_value("station_from", "");
+            return;
+        }
+
+        frm.set_value(
+            "station_from",
+            addresses[0].custom_citytown || ""
+        );
+    });
+}
+
+
+function set_station_to_customer(frm) {
+    if (!frm.doc.consignee) {
+        frm.set_value("station_to", "");
+        return;
+    }
+
+    frappe.db.get_value(
+        "Customer",
+        frm.doc.consignee,
+        "customer_primary_address"
+    ).then(r => {
+        const address = r.message?.customer_primary_address;
+        if (!address) return;
+
+        frappe.db.get_value(
+            "Address",
+            address,
+            "custom_citytown"
+        ).then(addr => {
+            if (addr.message?.custom_citytown) {
+                frm.set_value(
+                    "station_to",
+                    addr.message.custom_citytown
+                );
+            }
+        });
+    });
+}
+
+frappe.ui.form.on("Outgoing Logistics", {
+
+    before_save: function (frm) {
+        const rows = frm.doc.sales_invoice_no || [];
+
+        const has_sales_invoice = rows.some(row => row.sales_invoice);
+
+        if (!has_sales_invoice) {
+            frappe.throw(__(
+                "At least one Sales Invoice is required to create Outgoing logistics."
+            ));
+        }
+    }
+});

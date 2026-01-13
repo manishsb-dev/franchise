@@ -15,7 +15,6 @@
   "transporter",
   "column_break_kknq",
   "type",
-  "stock_point",
   "date",
   "document_no",
   "column_break_sgwy",
@@ -88,13 +87,6 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Transporter",
-   "reqd": 1
-  },
-  {
-   "fieldname": "stock_point",
-   "fieldtype": "Link",
-   "label": "Stock Point",
-   "options": "Warehouse",
    "reqd": 1
   },
   {
@@ -193,25 +185,30 @@
   },
   {
    "fieldname": "to_pay",
-   "fieldtype": "Data",
-   "label": "To Pay"
+   "fieldtype": "Select",
+   "label": "To Pay",
+   "options": "Yes\nNo"
   },
   {
+   "depends_on": "eval:doc.to_pay == \"Yes\"",
    "fieldname": "actual_weight",
    "fieldtype": "Data",
    "label": "Actual Weight"
   },
   {
+   "depends_on": "eval:doc.to_pay == \"Yes\"",
    "fieldname": "freight_charges",
    "fieldtype": "Data",
    "label": "Freight Charges"
   },
   {
+   "depends_on": "eval:doc.to_pay == \"Yes\"",
    "fieldname": "declaration_amount",
    "fieldtype": "Data",
    "label": "Declaration Amount"
   },
   {
+   "depends_on": "eval:doc.to_pay == \"Yes\"",
    "fieldname": "document_amount",
    "fieldtype": "Data",
    "label": "Document Amount"
@@ -221,21 +218,25 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.to_pay == \"Yes\"",
    "fieldname": "rate",
    "fieldtype": "Data",
    "label": "Rate"
   },
   {
+   "depends_on": "eval:doc.to_pay == \"Yes\"",
    "fieldname": "charged_weight",
    "fieldtype": "Data",
    "label": "Charged Weight"
   },
   {
+   "depends_on": "eval:doc.to_pay == \"Yes\"",
    "fieldname": "total_amount",
    "fieldtype": "Data",
    "label": "Total Amount"
   },
   {
+   "depends_on": "eval:doc.to_pay == \"Yes\"",
    "fieldname": "completion_time",
    "fieldtype": "Date",
    "label": "Completion Time"
@@ -270,6 +271,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.to_pay == \"Yes\"",
    "fieldname": "additional_charges",
    "fieldtype": "Data",
    "label": "Additional Charges"
@@ -291,7 +293,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-08 16:06:46.595777",
+ "modified": "2026-01-13 12:36:16.719856",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "Outgoing Logistics",
