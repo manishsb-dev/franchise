@@ -20,9 +20,12 @@ frappe.ui.form.CustomerQuickEntryForm = class CustomerQuickEntryForm extends fra
         ];
 
         fields_to_hide.forEach(fieldname => {
-            if (this.dialog.fields_dict[fieldname]) {
-                this.dialog.set_df_property(fieldname, "hidden", 1);
+            const field = this.dialog.fields_dict[fieldname];
+            if (field) {
+                field.$wrapper.hide();   // sirf Quick Entry
             }
+
+        
         });
 
         const company_field = this.dialog.fields_dict.custom_company;
