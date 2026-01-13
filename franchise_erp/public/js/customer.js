@@ -47,17 +47,13 @@ frappe.ui.form.on("Customer", {
 
 function set_required_fields(frm) {
     // 🔒 form / fields ready hone ke baad hi run ho
-    if (!frm.fields_dict.custom_transporter) return;
 
     if (!frm.doc.custom_company) {
         setTimeout(() => {
-            frm.set_df_property("custom_transporter", "reqd", 0);
-            frm.toggle_display("custom_transporter", 0);
 
             frm.set_df_property("custom_mobile_no_customer", "reqd", 0);
             frm.toggle_display("custom_mobile_no_customer", 1);
 
-            frm.refresh_field("custom_transporter");
             frm.refresh_field("custom_mobile_no_customer");
         }, 0);
         return;
@@ -68,12 +64,6 @@ function set_required_fields(frm) {
             const is_group = r.message?.is_group;
 
             setTimeout(() => {
-                frm.set_df_property(
-                    "custom_transporter",
-                    "reqd",
-                    is_group ? 1 : 0
-                );
-                frm.toggle_display("custom_transporter", is_group);
 
                 frm.set_df_property(
                     "custom_mobile_no_customer",
@@ -82,7 +72,6 @@ function set_required_fields(frm) {
                 );
                 frm.toggle_display("custom_mobile_no_customer", !is_group);
 
-                frm.refresh_field("custom_transporter");
                 frm.refresh_field("custom_mobile_no_customer");
             }, 0);
         });
@@ -149,5 +138,27 @@ function auto_add_credit_limit_row(frm) {
 
         frm.refresh_field("credit_limits");
     }
+}
+
+
+
+frappe.ui.form.on("Customer", {
+    onload(frm) {
+        toggle_pan_mandatory(frm);
+    },
+    refresh(frm) {
+        toggle_pan_mandatory(frm);
+    },
+    tax_withholding_category(frm) {
+        toggle_pan_mandatory(frm);
+    }
+});
+
+function toggle_pan_mandatory(frm) {
+    const has_tds = !!frm.doc.tax_withholding_category;
+
+    frm.set_df_property("pan", "reqd", has_tds ? 1 : 0);
+
+    frm.refresh_field("pan");
 }
 
