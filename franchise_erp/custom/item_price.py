@@ -19,11 +19,11 @@ def validate_item_price(doc, method):
     )
     
 
-    if exists:
-        frappe.throw(
-            f"Item Price already exists for <b>{target_price_list}</b>",
-            title="Duplicate Item Price"
-        )
+    # if exists:
+    #     frappe.throw(
+    #         f"Item Price already exists for <b>{target_price_list}</b>",
+    #         title="Duplicate Item Price"
+    #     )
 
     # SAME PRICE copy karke Standard Selling banana
     ip = frappe.new_doc("Item Price")
