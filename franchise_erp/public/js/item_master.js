@@ -121,7 +121,11 @@ frappe.ui.form.on('Item', {
 
 frappe.ui.form.on("Item", {
     refresh(frm) {
-        frm.set_df_property("title", "read_only", 1);
+        // Disable rename action
+        frm.disable_rename = true;
+
+        // Remove pencil icon
+        $(".page-title .editable-title").css("pointer-events", "none");
     }
 });
 
