@@ -130,3 +130,44 @@ def create_pi_from_gate_entry(gate_entry):
 
     pi.save()
     return pi.name
+
+
+
+
+
+import frappe
+from frappe.utils import flt
+
+
+@frappe.whitelist()
+def get_supplier_stats(supplier, company):
+    if not supplier or not company:
+        return {
+            "annual_billing": 0,
+            "total_unpaid": 0
+        }
+
+    # Load supplier exactly like ERPNext form load
+    supplier_doc = frappe.get_doc("Supplier", supplier)
+
+    # __onload is populated ONLY after this
+    supplier_doc.run_method("onload")
+
+    dashboard_info = (
+        supplier_doc.get("__onload", {})
+        .get("dashboard_info", [])
+    )
+
+    annual_billing = 0
+    total_unpaid = 0
+
+    for row in dashboard_info:
+        if row.get("company") == company:
+            annual_billing = row.get("billing_this_year", 0)
+            total_unpaid = row.get("total_unpaid", 0)
+            break
+
+    return {
+        "annual_billing": flt(annual_billing),
+        "total_unpaid": flt(total_unpaid)
+    }

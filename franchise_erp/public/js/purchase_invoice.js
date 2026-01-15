@@ -190,3 +190,60 @@ frappe.ui.form.on("Purchase Invoice", {
 //         frm.set_df_property("bill_date", "reqd", 1);
 //     }
 // }
+
+
+
+frappe.ui.form.on("Purchase Invoice", {
+    refresh(frm) {
+        frm.clear_custom_buttons();
+
+        if (frm.doc.is_return && frm.doc.supplier) {
+            frm.add_custom_button("Outstanding", () => {
+                show_supplier_outstanding(frm);
+            });
+        }
+    },
+
+    is_return(frm) {
+        frm.trigger("refresh");
+    },
+
+    supplier(frm) {
+        frm.trigger("refresh");
+    }
+});
+
+function show_supplier_outstanding(frm) {
+    frappe.call({
+        method: "franchise_erp.custom.purchase_invoice.get_supplier_stats",
+        args: {
+            supplier: frm.doc.supplier,
+            company: frm.doc.company
+        },
+        callback(r) {
+            let data = r.message || {};
+
+            let annual_billing = data.annual_billing || 0;
+            let total_unpaid = data.total_unpaid || 0;
+
+            let d = new frappe.ui.Dialog({
+                title: "Supplier Outstanding",
+                fields: [
+                    {
+                        fieldtype: "HTML",
+                        fieldname: "stats",
+                        options: `
+                            <div style="padding:10px">
+                                <p><b>Annual Billing:</b> ₹ ${annual_billing}</p>
+                                <p><b>Total Unpaid:</b> ₹ ${total_unpaid}</p>
+                            </div>
+                        `
+                    }
+                ],
+                size: "small"
+            });
+
+            d.show();
+        }
+    });
+}
