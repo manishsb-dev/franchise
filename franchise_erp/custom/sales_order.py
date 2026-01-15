@@ -1,23 +1,41 @@
 import frappe
 
-def apply_sales_term(doc, method=None):
+def apply_sales_term(doc, method):
     if not doc.custom_sales_term:
         return
 
     term = frappe.get_doc("Sales Term Template", doc.custom_sales_term)
 
-    for item in doc.items:
+    total_flat_discount = 0.0
+    header_discount_percent = 0.0
 
-        # Store base rate ONCE (idempotent)
-        if not item.custom_base_rate_new:
-            item.custom_base_rate_new = item.rate
 
-        adjusted_rate = item.custom_base_rate_new
+    # -----------------------------------
+    # 2️⃣ DOCUMENT LEVEL : DISCOUNT ONLY
+    # -----------------------------------
+    for row in term.sales_term_charges:
+        if row.charge_type == "Discount":
 
-        for row in term.sales_term_charges:
-            print(row.charge_type)
-            if row.charge_type == "Rate Diff":
-                adjusted_rate -= row.value
+            # Percentage discount on Net Total / Grand Total
+            if row.value_type == "Percentage":
+                header_discount_percent = row.value
 
-        item.rate = adjusted_rate
+            # Flat amount discount
+            elif row.value_type == "Amount":
+                total_flat_discount += row.value
 
+            else:
+                return
+
+
+    # -----------------------------------
+    # 3️⃣ PUSH TO ERPNext STANDARD FIELDS
+    # -----------------------------------
+    if header_discount_percent:
+        doc.apply_discount_on = "Net Total"
+        doc.additional_discount_percentage = header_discount_percent
+
+
+    elif total_flat_discount:
+        doc.apply_discount_on = "Net Total"
+        doc.discount_amount = total_flat_discount

@@ -1,0 +1,242 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:rule_name",
+ "creation": "2026-01-15 16:22:28.015393",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "rule_information_section",
+  "rule_information_column",
+  "rule_name",
+  "description",
+  "column_break_ksap",
+  "applicable_from",
+  "section_break_pwgp",
+  "cost_to_mrp_column",
+  "mrp_calc_method",
+  "mrp_cost_basis",
+  "mrp_tax_basis",
+  "mrp_basis",
+  "mrp_min_margin_type",
+  "mrp_margin_percent",
+  "mrp_margin_amount",
+  "mrp_rounding",
+  "mrp_status",
+  "mrp_alert",
+  "mrp_rule_interpretation",
+  "column_break_sopk",
+  "wsp_calc_method",
+  "wsp_cost_basis",
+  "wsp_tax_basis",
+  "wsp_min_margin_type",
+  "wsp_margin_percent",
+  "wsp_margin_amount",
+  "wsp_rounding",
+  "wsp_status",
+  "wsp_alert",
+  "wsp_rule_interpretation"
+ ],
+ "fields": [
+  {
+   "fieldname": "rule_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Rule Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "rule_information_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rule_information_section",
+   "fieldtype": "Section Break",
+   "label": "Rule Information"
+  },
+  {
+   "fieldname": "column_break_ksap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "applicable_from",
+   "fieldtype": "Table",
+   "label": "Applicable From",
+   "options": "Markup Rule Period"
+  },
+  {
+   "fieldname": "section_break_pwgp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_sopk",
+   "fieldtype": "Column Break",
+   "label": "Cost to WSP"
+  },
+  {
+   "fieldname": "cost_to_mrp_column",
+   "fieldtype": "Column Break",
+   "label": "Cost to MRP"
+  },
+  {
+   "default": "0",
+   "fieldname": "mrp_alert",
+   "fieldtype": "Check",
+   "label": "Alert when margin is either less or more than the above specification."
+  },
+  {
+   "fieldname": "mrp_calc_method",
+   "fieldtype": "Select",
+   "label": "Calculation Method",
+   "options": "Markup\nMarkdown"
+  },
+  {
+   "fieldname": "mrp_cost_basis",
+   "fieldtype": "Select",
+   "label": "Cost will be taken as",
+   "options": "Basic Cost\nEffective Cost"
+  },
+  {
+   "fieldname": "mrp_tax_basis",
+   "fieldtype": "Select",
+   "label": "Consider Tax in Margin",
+   "options": "Gross of Tax\nNet of Tax"
+  },
+  {
+   "fieldname": "mrp_basis",
+   "fieldtype": "Select",
+   "label": "MRP will be taken as",
+   "options": "RSP\nMRP"
+  },
+  {
+   "fieldname": "mrp_min_margin_type",
+   "fieldtype": "Select",
+   "label": "Minimum Margin",
+   "options": "On Percentage\nOn Amount"
+  },
+  {
+   "depends_on": "eval:doc.mrp_min_margin_type==\"On Percentage\"",
+   "fieldname": "mrp_margin_percent",
+   "fieldtype": "Float",
+   "label": "Margin %"
+  },
+  {
+   "depends_on": "eval:doc.mrp_min_margin_type==\"On Amount\"",
+   "fieldname": "mrp_margin_amount",
+   "fieldtype": "Currency",
+   "label": "Margin Amount"
+  },
+  {
+   "fieldname": "mrp_rounding",
+   "fieldtype": "Select",
+   "label": "Round Off",
+   "options": "Upper\nDown"
+  },
+  {
+   "fieldname": "mrp_status",
+   "fieldtype": "Select",
+   "label": "Rule Status",
+   "options": "Active\nInactive"
+  },
+  {
+   "fieldname": "wsp_calc_method",
+   "fieldtype": "Select",
+   "label": "Calculation Method",
+   "options": "Markup\nMarkdown"
+  },
+  {
+   "fieldname": "wsp_cost_basis",
+   "fieldtype": "Select",
+   "label": "Cost will be taken as",
+   "options": "Basic Cost\nEffective Cost"
+  },
+  {
+   "fieldname": "wsp_tax_basis",
+   "fieldtype": "Select",
+   "label": "Consider Tax in Margin",
+   "options": "Gross of Tax\nNet of Tax"
+  },
+  {
+   "fieldname": "wsp_min_margin_type",
+   "fieldtype": "Select",
+   "label": "Minimum Margin",
+   "options": "On Percentage\nOn Amount"
+  },
+  {
+   "depends_on": "eval:doc.wsp_min_margin_type==\"On Percentage\"",
+   "fieldname": "wsp_margin_percent",
+   "fieldtype": "Float",
+   "label": "Margin %"
+  },
+  {
+   "depends_on": "eval:doc.wsp_min_margin_type==\"On Amount\"",
+   "fieldname": "wsp_margin_amount",
+   "fieldtype": "Currency",
+   "label": "Margin Amount"
+  },
+  {
+   "fieldname": "wsp_rounding",
+   "fieldtype": "Select",
+   "label": "Round Off",
+   "options": "Upper\nDown"
+  },
+  {
+   "fieldname": "wsp_status",
+   "fieldtype": "Select",
+   "label": "Rule Status",
+   "options": "Active\nInactive"
+  },
+  {
+   "default": "0",
+   "fieldname": "wsp_alert",
+   "fieldtype": "Check",
+   "label": "Alert when margin is either less or more than the above specification. Copy"
+  },
+  {
+   "fieldname": "mrp_rule_interpretation",
+   "fieldtype": "Long Text",
+   "label": "Rule Interpretation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "wsp_rule_interpretation",
+   "fieldtype": "Long Text",
+   "label": "Rule Interpretation",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-15 17:42:00.801603",
+ "modified_by": "Administrator",
+ "module": "Franchise Erp",
+ "name": "Markup Rule Template",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
