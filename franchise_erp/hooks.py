@@ -126,8 +126,12 @@ doctype_js = {
     "Customer":"public/js/customer.js",
     "BOM":"public/js/bom.js",
     "Delivery Note": "public/js/delivery_note.js",
+<<<<<<< Updated upstream
     "Subcontracting Order": "public/js/subcontracting_order.js",
     "Subcontracting Receipt": "public/js/subcontracting_receipt.js"
+=======
+    "Stock Entry": "public/js/stock_entry.js"
+>>>>>>> Stashed changes
 }
 
 
