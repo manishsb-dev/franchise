@@ -151,3 +151,12 @@ frappe.ui.form.on("Item Price Row", {
         frm.refresh_field("custom_item_prices");
     }
 });
+
+frappe.ui.form.on("Item", {
+    refresh(frm) {
+        // If document is already saved
+        if (!frm.is_new()) {
+            frm.set_df_property("item_code", "read_only", 1);
+        }
+    }
+});
