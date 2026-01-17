@@ -11,6 +11,7 @@
   "owner_site",
   "company_abbreviation",
   "consignee",
+  "consignee_supplier",
   "transporter",
   "column_break_kknq",
   "type",
@@ -19,7 +20,7 @@
   "column_break_sgwy",
   "document_date",
   "mode",
-  "site",
+  "remarks",
   "transport_information_section",
   "quantity",
   "station_from",
@@ -106,11 +107,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "site",
-   "fieldtype": "Data",
-   "label": "Site"
-  },
-  {
    "fieldname": "mode",
    "fieldtype": "Select",
    "label": "Mode",
@@ -118,8 +114,9 @@
   },
   {
    "fieldname": "document_no",
-   "fieldtype": "Data",
-   "label": "Document No"
+   "fieldtype": "Link",
+   "label": "Document No",
+   "options": "Subcontracting Order"
   },
   {
    "fieldname": "transport_information_section",
@@ -269,8 +266,8 @@
    "fieldname": "consignee",
    "fieldtype": "Link",
    "label": "Consignee",
-   "options": "Customer",
-   "reqd": 1
+   "mandatory_depends_on": "eval: !doc.document_no",
+   "options": "Customer"
   },
   {
    "depends_on": "eval:doc.to_pay == \"Yes\"",
@@ -290,6 +287,18 @@
    "fieldname": "company_abbreviation",
    "fieldtype": "Data",
    "label": "Company Abbreviation"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "consignee_supplier",
+   "fieldtype": "Link",
+   "label": "Consignee",
+   "options": "Supplier",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,

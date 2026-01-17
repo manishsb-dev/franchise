@@ -148,20 +148,6 @@ function set_station_to_customer(frm) {
     });
 }
 
-frappe.ui.form.on("Outgoing Logistics", {
-
-    before_save: function (frm) {
-        const rows = frm.doc.sales_invoice_no || [];
-
-        const has_sales_invoice = rows.some(row => row.sales_invoice);
-
-        if (!has_sales_invoice) {
-            frappe.throw(__(
-                "At least one Sales Invoice is required to create Outgoing logistics."
-            ));
-        }
-    }
-});
 
 frappe.ui.form.on("Outgoing Logistics", {
     refresh(frm) {
@@ -170,5 +156,28 @@ frappe.ui.form.on("Outgoing Logistics", {
 
         // Remove pencil icon
         $(".page-title .editable-title").css("pointer-events", "none");
+    }
+});
+
+
+frappe.ui.form.on("Outgoing Logistics", {
+    document_no(frm) {
+        toggle_mandatory_logic(frm);
+    },
+
+    before_save(frm) {
+        // If Job Work Order is selected, skip validation
+        if (frm.doc.document_no) {
+            return;
+        }
+
+        const rows = frm.doc.sales_invoice_no || [];
+        const has_sales_invoice = rows.some(row => row.sales_invoice);
+
+        if (!has_sales_invoice) {
+            frappe.throw(__(
+                "At least one Sales Invoice is required to create Outgoing Logistics."
+            ));
+        }
     }
 });

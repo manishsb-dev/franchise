@@ -105,7 +105,6 @@
    "fetch_from": "consignor.custom_transporter",
    "fieldname": "transporter",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Transporter",
    "options": "Supplier",
    "reqd": 1
@@ -383,7 +382,7 @@
    "link_fieldname": "incoming_logistics"
   }
  ],
- "modified": "2026-01-16 10:31:35.885240",
+ "modified": "2026-01-17 10:21:12.206121",
  "modified_by": "Administrator",
  "module": "Franchise Erp",
  "name": "Incoming Logistics",

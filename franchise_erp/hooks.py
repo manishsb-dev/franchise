@@ -125,7 +125,9 @@ doctype_js = {
     "Sales Order":"public/js/sales_order.js",
     "Customer":"public/js/customer.js",
     "BOM":"public/js/bom.js",
-    "Delivery Note": "public/js/delivery_note.js"
+    "Delivery Note": "public/js/delivery_note.js",
+    "Subcontracting Order": "public/js/subcontracting_order.js",
+    "Subcontracting Receipt": "public/js/subcontracting_receipt.js"
 }
 
 
