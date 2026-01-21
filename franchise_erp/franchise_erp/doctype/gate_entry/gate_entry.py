@@ -34,25 +34,34 @@ class GateEntry(Document):
 
 # fetch box barcode list
 @frappe.whitelist()
-def get_box_barcodes_for_gate_entry(incoming_logistics):
-    """
-    Fetch box barcodes for selected Incoming Logistics
-    """
+def get_data_for_gate_entry(incoming_logistics):
+    il = frappe.get_doc("Incoming Logistics", incoming_logistics)
 
-    if not incoming_logistics:
-        return []
+    return {
+        # -------- Header Fields --------
+        "lr_quantity": il.lr_quantity,
+        "document_no": il.lr_document_no,
+        "declaration_amount": il.declaration_amount,
+        "qty_as_per_invoice":il.received_qty,
 
-    return frappe.get_all(
-        "Gate Entry Box Barcode",
-        filters={
-            "incoming_logistics_no": incoming_logistics
-        },
-        fields=[
-            "box_barcode",
-            "incoming_logistics_no",
-            "status"
+        # -------- Purchase Orders --------
+        "purchase_orders": [
+            {
+                "purchase_order": row.purchase_order
+            }
+            for row in il.purchase_ids
+        ],
+
+        # -------- Box Barcodes --------
+        "box_barcodes": [
+            {
+                "box_barcode": row.box_barcode,
+                "incoming_logistics_no": row.incoming_logistics_no,
+                "status": row.status
+            }
+            for row in il.gate_entry_box_barcode
         ]
-    )
+    }
 
 #update status only for box barcode table
 @frappe.whitelist()

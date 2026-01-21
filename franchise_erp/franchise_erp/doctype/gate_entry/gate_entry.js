@@ -10,34 +10,47 @@
 // get box barcode list
 
 frappe.ui.form.on("Gate Entry", {
-    incoming_logistics: function(frm) {
-        if (frm.doc.incoming_logistics) {
-            frappe.call({
-                method: "franchise_erp.franchise_erp.doctype.gate_entry.gate_entry.get_box_barcodes_for_gate_entry",
-                args: {
-                    incoming_logistics: frm.doc.incoming_logistics
-                },
-                callback: function(r) {
-                    frm.clear_table("gate_entry_box_barcode");
-
-                    if (r.message) {
-                        r.message.forEach(row => {
-                            let child = frm.add_child("gate_entry_box_barcode");
-                            child.box_barcode = row.box_barcode;
-                            child.incoming_logistics_no = row.incoming_logistics_no;
-                            child.status = row.status;
-                            child.total_barcode_qty = row.total_barcode_qty;
-                            child.scan_date_time = row.scan_date_time;
-                        });
-                    }
-
-                    frm.refresh_field("gate_entry_box_barcode");
-                }
-            });
-        } else {
+    incoming_logistics(frm) {
+        if (!frm.doc.incoming_logistics) {
+            frm.clear_table("purchase_orders");
             frm.clear_table("gate_entry_box_barcode");
-            frm.refresh_field("gate_entry_box_barcode");
+            frm.refresh_fields();
+            return;
         }
+
+        frappe.call({
+            method: "franchise_erp.franchise_erp.doctype.gate_entry.gate_entry.get_data_for_gate_entry",
+            args: {
+                incoming_logistics: frm.doc.incoming_logistics
+            },
+            callback(r) {
+                if (!r.message) return;
+
+                const data = r.message;
+
+                // -------- Header Fields --------
+                frm.set_value("lr_quantity", data.lr_quantity);
+                frm.set_value("document_no", data.document_no);
+                frm.set_value("declaration_amount", data.declaration_amount);
+                frm.set_value("quantity_as_per_invoice", data.qty_as_per_invoice);
+
+                // -------- Purchase Orders --------
+                frm.clear_table("purchase_ids");
+                (data.purchase_orders || []).forEach(row => {
+                    let child = frm.add_child("purchase_ids");
+                    Object.assign(child, row);
+                });
+
+                // -------- Box Barcodes --------
+                frm.clear_table("gate_entry_box_barcode");
+                (data.box_barcodes || []).forEach(row => {
+                    let child = frm.add_child("gate_entry_box_barcode");
+                    Object.assign(child, row);
+                });
+
+                frm.refresh_fields();
+            }
+        });
     }
 });
 
