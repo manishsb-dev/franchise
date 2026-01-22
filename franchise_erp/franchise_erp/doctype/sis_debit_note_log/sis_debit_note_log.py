@@ -506,13 +506,27 @@ def get_item_input_gst(item_code, company):
 #         "to_date": str(to_date)
 #     }
 
+from decimal import Decimal, ROUND_HALF_UP
 
+def R2(val):
+    return val.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 @frappe.whitelist()
 def fetch_invoices(company, from_date=None, to_date=None):
+
+    import frappe
+    from decimal import Decimal
+    from frappe.utils import getdate
+
+    # -------------------------------------------------------------------
+    # SMALL HELPER → ALWAYS RETURN DECIMAL
+    # -------------------------------------------------------------------
+    def D(val):
+        return Decimal(str(val or 0))
+
     # -------------------------------------------------------------------
     # FETCH CONFIG VALUES
     # -------------------------------------------------------------------
-    fresh_margin, discounted_margin, period_type, auto_credit_note_percent, discount_threshold = frappe.db.get_value(
+    config = frappe.db.get_value(
         "SIS Configuration",
         {"company": company},
         [
@@ -521,16 +535,18 @@ def fetch_invoices(company, from_date=None, to_date=None):
             "sis_debit_note_creation_period",
             "auto_credit_note_percent",
             "discount_threshold",
-        ]
+        ],
+        as_dict=True
     )
 
-    if not period_type:
-        frappe.throw(_("Please set Debit Note Creation Period in SIS Configuration"))
+    if not config or not config.sis_debit_note_creation_period:
+        frappe.throw("Please set Debit Note Creation Period in SIS Configuration")
 
-    fresh_margin = to_decimal(fresh_margin or 0)
-    discounted_margin = to_decimal(discounted_margin or 0)
-    auto_credit_note_percent = to_decimal(auto_credit_note_percent or 0)
-    discount_threshold = to_decimal(discount_threshold or 0)
+    fresh_margin = D(config.fresh_margin)
+    discounted_margin = D(config.discounted_margin)
+    period_type = config.sis_debit_note_creation_period
+    auto_credit_note_percent = D(config.auto_credit_note_percent)
+    discount_threshold = D(config.discount_threshold)
 
     # -------------------------------------------------------------------
     # CLEAN DATE INPUTS
@@ -539,11 +555,9 @@ def fetch_invoices(company, from_date=None, to_date=None):
     to_date = None if not to_date or to_date in ["", "null"] else to_date
 
     # -------------------------------------------------------------------
-    # SET DATE RANGE (🔥 FIXED LOGIC)
+    # SET DATE RANGE
     # -------------------------------------------------------------------
     if period_type == "Date Range":
-
-        # FALLBACK: fetch dates from SIS Configuration
         if not from_date or not to_date:
             from_date, to_date = frappe.db.get_value(
                 "SIS Configuration",
@@ -552,22 +566,15 @@ def fetch_invoices(company, from_date=None, to_date=None):
             )
 
         if not from_date or not to_date:
-            frappe.throw(_("Please select From Date and To Date"))
-
+            frappe.throw("Please select From Date and To Date")
     else:
         from_date, to_date = get_period_dates(period_type)
-
 
     from_date = getdate(from_date)
     to_date = getdate(to_date)
 
     if from_date > to_date:
-        frappe.throw(_("From Date cannot be greater than To Date"))
-
-    frappe.log_error(
-        "DATE_RANGE_USED",
-        f"From: {from_date}, To: {to_date}, Period: {period_type}"
-    )
+        frappe.throw("From Date cannot be greater than To Date")
 
     # -------------------------------------------------------------------
     # FETCH DELIVERY NOTE DATA
@@ -585,9 +592,9 @@ def fetch_invoices(company, from_date=None, to_date=None):
             dni.rate,
             dni.price_list_rate,
             dni.discount_percentage,
-            (dni.qty * dni.price_list_rate) AS total_amount,
-            ((dni.qty * dni.price_list_rate) * dni.discount_percentage / 100) AS discount_amount,
-            ((dni.qty * dni.price_list_rate) - ((dni.qty * dni.price_list_rate) * dni.discount_percentage / 100)) AS net_amount
+            dni.custom_is_promo_scheme,
+            dni.custom_promo_discount_percent,
+            (dni.qty * dni.price_list_rate) AS total_amount
         FROM `tabDelivery Note` dn
         JOIN `tabDelivery Note Item` dni ON dni.parent = dn.name
         WHERE 
@@ -603,43 +610,75 @@ def fetch_invoices(company, from_date=None, to_date=None):
     # PROCESS EACH ITEM
     # -------------------------------------------------------------------
     for r in invoices:
-        net_amount = to_decimal(r.get("net_amount") or 0)
 
+        total_amount = D(r.total_amount)
+
+        discount_percentage = D(r.discount_percentage)
+        promo_discount = D(r.custom_promo_discount_percent)
+        is_promo = r.custom_is_promo_scheme
+
+        # 🔥 PROMO DISCOUNT OVERRIDE
+        if is_promo and promo_discount > 0:
+            discount_percentage = promo_discount
+
+        discount_amount = (total_amount * discount_percentage) / D(100)
+        net_amount = total_amount - discount_amount
+
+        # -------------------------------------------------------------------
         # OUTPUT GST
-        gst_percent = Decimal("5.0") if net_amount <= Decimal("2500") else Decimal("18.0")
-        out_put_gst_value = net_amount * gst_percent / (100 + gst_percent)
+        # -------------------------------------------------------------------
+        gst_percent = D(5) if net_amount <= D(2500) else D(18)
+        out_put_gst_value = net_amount * gst_percent / (D(100) + gst_percent)
+        out_put_gst_value = R2(out_put_gst_value)
         net_sale_value = net_amount - out_put_gst_value
 
-        discount_percentage = to_decimal(r.get("discount_percentage") or 0)
-        margin_percent = discounted_margin if discount_percentage > 0 else fresh_margin
-        margin_amount = (net_amount * margin_percent) / Decimal(100)
-        inv_base_value = net_sale_value - margin_amount
+        # -------------------------------------------------------------------
+        # MARGIN LOGIC
+        # -------------------------------------------------------------------
+        if is_promo or discount_percentage > 0:
+            margin_percent = discounted_margin
+        else:
+            margin_percent = fresh_margin
 
+        margin_amount = (net_amount * margin_percent) / D(100)
+        inv_base_value = net_sale_value - margin_amount
+        inv_base_value = R2(inv_base_value)
+        # -------------------------------------------------------------------
         # INPUT GST
-        item_code = r.get("item_code")
-        st_percent, gst_amount_per_item, single_item_rate = get_item_input_gst(item_code, company)
+        # -------------------------------------------------------------------
+        st_percent, gst_amount_per_item, single_item_rate = get_item_input_gst(
+            r.item_code, company
+        )
+
+        gst_amount_per_item = D(gst_amount_per_item)
+        single_item_rate = D(single_item_rate)
 
         total_serial_invoice_value = single_item_rate + gst_amount_per_item
         invoice_value = inv_base_value + gst_amount_per_item
-        cd_dn_value = total_serial_invoice_value - invoice_value
+        debit_note_value = total_serial_invoice_value - invoice_value
 
+        # -------------------------------------------------------------------
+        # FINAL UPDATE
+        # -------------------------------------------------------------------
         r.update({
+            "total_amount": float(total_amount),
+            "discount_percentage": float(discount_percentage),
+            "discount_amount": float(discount_amount),
+            "net_amount": float(net_amount),
             "gst_percent": float(gst_percent),
-            "gst_amount": round2(out_put_gst_value),
-            "net_sale_value": round2(net_sale_value),
-            "inv_base_value": round2(inv_base_value),
-            "in_put_gst_value": round2(gst_amount_per_item),
+            "gst_amount": float(out_put_gst_value),
+            "net_sale_value": float(net_sale_value),
             "margin_percent": float(margin_percent),
-            "margin_amount": round2(margin_amount),
-            "total_amount": round2(to_decimal(r.get("total_amount") or 0)),
-            "discount_amount": round2(to_decimal(r.get("discount_amount") or 0)),
-            "net_amount": round2(net_amount),
-            "invoice_value": round2(invoice_value),
-            "debit_note": round2(cd_dn_value),
+            "margin_amount": float(margin_amount),
+            "inv_base_value": float(inv_base_value),
+            "in_put_gst_value": float(gst_amount_per_item),
+            "invoice_value": float(invoice_value),
+            "debit_note": float(debit_note_value),
         })
 
         processed.append(r)
 
+    # -------------------------------------------------------------------
     return {
         "invoice_list": processed,
         "period_type": period_type,
