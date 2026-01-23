@@ -3,6 +3,15 @@
 
 frappe.ui.form.on("Outgoing Logistics", {
 	refresh(frm) {
+        frm.set_query("consignee_supplier", function() {
+            return { 
+                filters: [
+                        ["is_transporter", "=", 0],
+                        ["custom_is_agent", "=", 0],
+                        ["custom_gate_entry", "=", 1]
+                    ]
+             };
+        });
         if (frm.doc.docstatus === 0) {
             frm.add_custom_button(
                 __("Fetch Sales Invoice ID"),

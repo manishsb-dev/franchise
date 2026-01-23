@@ -151,21 +151,69 @@ def calculate_sis_values(customer, rate):
 #     doc.calculate_taxes_and_totals()
 
 #Packed Item empty condition
+# def apply_sis_pricing(doc, method=None):
+#     if not doc.customer:
+#         return
+
+#     # 🔴 CONDITION: Product Bundle case
+#     # Agar Packed Items table me data hai → calculation skip
+#     if doc.get("packed_items") and len(doc.packed_items) > 0:
+#         return
+
+#     for item in doc.items:
+#         # Skip if rate not set
+#         if not item.rate:
+#             continue
+
+#         # Skip if product bundle item
+#         if item.custom_product_bundle:
+#             continue
+
+#         d = calculate_sis_values(doc.customer, item.rate)
+#         if not d:
+#             continue
+
+#         # -------- CUSTOM DISPLAY FIELDS --------
+#         item.custom_output_gst_ = d.get("gst_percent", 0)
+#         item.custom_output_gst_value = d.get("output_gst_value", 0)
+#         item.custom_net_sale_value = d.get("net_sale_value", 0)
+#         item.custom_margins_ = d.get("margin_percent", 0)
+#         item.custom_margin_amount = d.get("margin_amount", 0)
+#         item.custom_total_invoice_amount = d.get("taxable_value", 0)
+
+#         # -------- FINAL SELLING RATE --------
+#         item.rate = d.get("taxable_value", 0)
+
+#         # -------- ITEM TAX TEMPLATE --------
+#         item.item_tax_template = get_item_tax_template(
+#             d.get("gst_percent", 0)
+#         )
+
+#         # -------- FLAG --------
+#         item.custom_sis_calculated = 1
+
+#     # Recalculate totals
+#     doc.calculate_taxes_and_totals()
+
 def apply_sis_pricing(doc, method=None):
-    if not doc.customer:
+    if not doc.customer or not doc.items:
         return
 
-    # 🔴 CONDITION: Product Bundle case
-    # Agar Packed Items table me data hai → calculation skip
-    if doc.get("packed_items") and len(doc.packed_items) > 0:
+    # ❌ Product Bundle case skip
+    if doc.get("packed_items"):
         return
 
     for item in doc.items:
-        # Skip if rate not set
-        if not item.rate:
+
+        # Already calculated → skip
+        if item.custom_sis_calculated:
             continue
 
-        # Skip if product bundle item
+        # Rate must exist
+        if not item.rate or item.rate <= 0:
+            continue
+
+        # Product bundle line skip
         if item.custom_product_bundle:
             continue
 
@@ -173,27 +221,26 @@ def apply_sis_pricing(doc, method=None):
         if not d:
             continue
 
-        # -------- CUSTOM DISPLAY FIELDS --------
-        item.custom_output_gst_ = d.get("gst_percent", 0)
-        item.custom_output_gst_value = d.get("output_gst_value", 0)
-        item.custom_net_sale_value = d.get("net_sale_value", 0)
-        item.custom_margins_ = d.get("margin_percent", 0)
-        item.custom_margin_amount = d.get("margin_amount", 0)
-        item.custom_total_invoice_amount = d.get("taxable_value", 0)
+        # -------- DISPLAY FIELDS --------
+        item.custom_output_gst_ = d["gst_percent"]
+        item.custom_output_gst_value = d["output_gst_value"]
+        item.custom_net_sale_value = d["net_sale_value"]
+        item.custom_margins_ = d["margin_percent"]
+        item.custom_margin_amount = d["margin_amount"]
+        item.custom_total_invoice_amount = d["taxable_value"]
 
-        # -------- FINAL SELLING RATE --------
-        item.rate = d.get("taxable_value", 0)
+        # -------- FINAL RATE --------
+        item.rate = d["taxable_value"]
 
-        # -------- ITEM TAX TEMPLATE --------
+        # -------- TAX TEMPLATE --------
         item.item_tax_template = get_item_tax_template(
-            d.get("gst_percent", 0)
+            d["gst_percent"]
         )
 
-        # -------- FLAG --------
         item.custom_sis_calculated = 1
 
-    # Recalculate totals
     doc.calculate_taxes_and_totals()
+
 
 def get_item_tax_template(gst_percent):
     if gst_percent == 5:

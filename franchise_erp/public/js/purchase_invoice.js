@@ -247,3 +247,58 @@ function show_supplier_outstanding(frm) {
         }
     });
 }
+
+
+// get invoice_no and invoice_date from incoming logistics
+frappe.ui.form.on('Purchase Invoice', {
+    refresh(frm) {
+        // jab Get Items se data aa chuka ho
+        fetch_invoice_details(frm);
+    }
+});
+
+function fetch_invoice_details(frm) {
+    if (!frm.doc.items || frm.doc.items.length === 0) return;
+
+    // Step 1: Purchase Receipt nikaalo
+    let purchase_receipt = frm.doc.items[0].purchase_receipt;
+    if (!purchase_receipt) return;
+
+    // Step 2: Purchase Receipt se Gate Entry lao
+    frappe.db.get_value(
+        "Purchase Receipt",
+        purchase_receipt,
+        "custom_gate_entry",
+        (pr_res) => {
+            if (!pr_res || !pr_res.custom_gate_entry) return;
+
+            let gate_entry = pr_res.custom_gate_entry;
+
+            // Step 3: Gate Entry se Incoming Logistics lao
+            frappe.db.get_value(
+                "Gate Entry",
+                gate_entry,
+                "incoming_logistics",
+                (ge_res) => {
+                    if (!ge_res || !ge_res.incoming_logistics) return;
+
+                    let incoming_logistics = ge_res.incoming_logistics;
+
+                    // Step 4: Incoming Logistics se Invoice No & Date lao
+                    frappe.db.get_value(
+                        "Incoming Logistics",
+                        incoming_logistics,
+                        ["invoice_no", "invoice_date"],
+                        (il_res) => {
+                            if (!il_res) return;
+
+                            // Step 5: Purchase Invoice me set karo
+                            frm.set_value("bill_no", il_res.invoice_no);
+                            frm.set_value("bill_date", il_res.invoice_date);
+                        }
+                    );
+                }
+            );
+        }
+    );
+}

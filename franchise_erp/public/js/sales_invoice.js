@@ -47,12 +47,24 @@ frappe.ui.form.on('Sales Invoice Item', {
     form_render(frm, cdt, cdn) {
         apply_discount_hide(frm, cdt, cdn);
     },
-    rate(frm, cdt, cdn) {
-        calculate_sis(frm, cdt, cdn);
-    },
-    qty(frm, cdt, cdn) {
-        calculate_sis(frm, cdt, cdn);
-    }
+    // item(frm, cdt, cdn) {
+    //     frappe.model.set_value(cdt, cdn, "custom_sis_calculated", 0);
+    //     calculate_sis(frm, cdt, cdn);
+    // },
+    // rate(frm, cdt, cdn) {
+    //     frappe.model.set_value(cdt, cdn, "custom_sis_calculated", 0);
+    //     calculate_sis(frm, cdt, cdn);
+    // },
+    // qty(frm, cdt, cdn) {
+    //     frappe.model.set_value(cdt, cdn, "custom_sis_calculated", 0);
+    //     calculate_sis(frm, cdt, cdn);
+    // },
+    // serial_no(frm, cdt, cdn) {
+    //     frappe.model.set_value(cdt, cdn, "custom_sis_calculated", 0);
+    //     setTimeout(() => {
+    //         calculate_sis(frm, cdt, cdn);
+    //     }, 400);
+    // }
 });
 
 function apply_discount_hide(frm, cdt, cdn) {
@@ -85,9 +97,81 @@ function apply_discount_hide(frm, cdt, cdn) {
 /* ------------------------------------------------
    3. SIS Calculation
 ------------------------------------------------ */
-function calculate_sis(frm, cdt, cdn) {
+// function calculate_sis(frm, cdt, cdn) {
+//     const row = locals[cdt][cdn];
+//     if (!row?.rate || !frm.doc.customer) return;
+
+//     frappe.call({
+//         method: "franchise_erp.custom.sales_invoice.calculate_sis_values",
+//         args: {
+//             customer: frm.doc.customer,
+//             rate: row.rate
+//         },
+//         callback(r) {
+//             if (!r.message) return;
+//             Object.keys(r.message).forEach(k => {
+//                 frappe.model.set_value(cdt, cdn, k, r.message[k]);
+//             });
+//         }
+//     });
+// }
+frappe.ui.form.on('Sales Invoice', {
+    validate(frm) {
+        if (!frm.doc.customer) return;
+
+        (frm.doc.items || []).forEach(row => {
+
+            let last_qty = flt(row.custom_last_sis_qty || 0);
+            let current_qty = flt(row.qty || 0);
+
+            // Agar qty increase nahi hui → kuch mat karo
+            if (current_qty <= last_qty) return;
+
+            // Newly added qty
+            let delta_qty = current_qty - last_qty;
+
+            // Rate missing
+            if (!row.rate || row.rate <= 0) return;
+
+            calculate_sis_delta(frm, row.doctype, row.name, delta_qty);
+        });
+    }
+});
+frappe.ui.form.on('Sales Invoice Item', {
+    serial_no(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (!row.serial_no) return;
+
+        let serials = row.serial_no.split('\n').map(s => s.trim());
+
+        let all_serials = [];
+        (frm.doc.items || []).forEach(r => {
+            if (r.name !== row.name && r.serial_no) {
+                all_serials.push(
+                    ...r.serial_no.split('\n').map(s => s.trim())
+                );
+            }
+        });
+
+        serials.forEach(s => {
+            if (all_serials.includes(s)) {
+                frappe.throw(`Serial No ${s} already scanned in another row`);
+            }
+        });
+    }
+});
+frappe.ui.form.on('Sales Invoice Item', {
+    serial_no(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (!row.serial_no) return;
+
+        let count = row.serial_no.split('\n').filter(Boolean).length;
+        frappe.model.set_value(cdt, cdn, 'qty', count);
+    }
+});
+
+function calculate_sis_delta(frm, cdt, cdn, delta_qty) {
     const row = locals[cdt][cdn];
-    if (!row?.rate || !frm.doc.customer) return;
 
     frappe.call({
         method: "franchise_erp.custom.sales_invoice.calculate_sis_values",
@@ -95,14 +179,24 @@ function calculate_sis(frm, cdt, cdn) {
             customer: frm.doc.customer,
             rate: row.rate
         },
+        async: false,
         callback(r) {
             if (!r.message) return;
-            Object.keys(r.message).forEach(k => {
-                frappe.model.set_value(cdt, cdn, k, r.message[k]);
-            });
+
+            // 🔹 Values for ONE qty
+            let taxable_rate = flt(r.message.taxable_value);
+
+            // 🔹 Apply only on delta qty
+            let incremental_amount = taxable_rate * delta_qty;
+
+            // 🔹 Update row totals safely
+            row.amount = flt(row.amount || 0) + incremental_amount;
+
+            frappe.model.set_value(cdt, cdn, "custom_last_sis_qty", row.qty);
         }
     });
 }
+
 
 /* ------------------------------------------------
    4. Due Date auto calculation
