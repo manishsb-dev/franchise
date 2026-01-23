@@ -54,6 +54,7 @@ doc_events = {
     },
     "Purchase Order": {
         "before_insert": "franchise_erp.custom.purchase_order.generate_serials_on_po_submit",
+        "on_submit": "franchise_erp.api.create_selling_price_from_po",
         "before_validate": ["franchise_erp.custom.purchase_order.apply_purchase_term"],
         "before_save": "franchise_erp.custom.purchase_order.apply_purchase_term_freight",
         # "on_change": "franchise_erp.api.on_change"
@@ -112,9 +113,10 @@ doc_events = {
             "franchise_erp.custom.delivery_note.set_promo_group_id",
             "franchise_erp.custom.delivery_note.set_percent_off_promo_flags"
         ],
+         "before_save":"franchise_erp.api.apply_scheme_on_dn"
+    },
     }
-
-}
+   
 
 
 
