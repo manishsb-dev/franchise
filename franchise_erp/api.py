@@ -52,3 +52,110 @@ def on_change(doc, method):
 
 
     apply_rounding_on_doc(doc)
+
+
+
+
+import frappe
+
+def apply_scheme_on_dn(doc, method):
+   
+    pass
+
+
+import frappe
+
+# def create_selling_price_from_po(doc, method):
+#     SELLING_PRICE_LISTS = ["MRP", "RSP"]
+
+#     for row in doc.items:
+#         if not row.item_code or not row.rate:
+#             continue
+
+#         for price_list in SELLING_PRICE_LISTS:
+#             item_price_name = frappe.db.get_value(
+#                 "Item Price",
+#                 {
+#                     "item_code": row.item_code,
+#                     "price_list": price_list
+#                 },
+#                 "name"
+#             )
+
+#             if item_price_name:
+#                 # Update existing selling price
+#                 frappe.db.set_value(
+#                     "Item Price",
+#                     item_price_name,
+#                     {
+#                         "price_list_rate": row.rate,
+#                         "valid_from": doc.transaction_date
+#                     }
+#                 )
+#             else:
+#                 # Create new selling price
+#                 frappe.get_doc({
+#                     "doctype": "Item Price",
+#                     "item_code": row.item_code,
+#                     "price_list": price_list,
+#                     "price_list_rate": row.rate,
+#                     "valid_from": doc.transaction_date
+#                 }).insert(ignore_permissions=True)
+
+
+
+
+
+
+import frappe
+
+def create_selling_price_from_po(doc, method):
+    # Active Pricing Rule nikaalo
+    pricing_rule = frappe.db.get_value(
+        "Pricing Rule",
+        {
+            "disable": 0
+        },
+        ["name", "custom_mrp_will_taken_as"],
+        as_dict=True
+    )
+
+    
+
+    price_list_type = pricing_rule.custom_mrp_will_taken_as
+    # price_list_type = "MRP" ya "RSP" aana chahiye
+
+
+    for row in doc.items:
+        if not row.item_code or not row.rate:
+            continue
+
+        # Check karo item price already hai ya nahi
+        item_price_name = frappe.db.get_value(
+            "Item Price",
+            {
+                "item_code": row.item_code,
+                "price_list": price_list_type
+            },
+            "name"
+        )
+
+        if item_price_name:
+            # Update existing
+            frappe.db.set_value(
+                "Item Price",
+                item_price_name,
+                {
+                    "price_list_rate": row.rate,
+                    "valid_from": doc.transaction_date
+                }
+            )
+        else:
+            # Create new
+            frappe.get_doc({
+                "doctype": "Item Price",
+                "item_code": row.item_code,
+                "price_list": price_list_type,
+                "price_list_rate": row.rate,
+                "valid_from": doc.transaction_date
+            }).insert(ignore_permissions=True)
