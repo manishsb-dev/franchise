@@ -113,7 +113,7 @@ doc_events = {
             "franchise_erp.custom.delivery_note.set_promo_group_id",
             "franchise_erp.custom.delivery_note.set_percent_off_promo_flags"
         ],
-         "before_save":"franchise_erp.api.apply_scheme_on_dn"
+        #  "before_save":"franchise_erp.api.apply_scheme_on_dn"
     },
     }
    

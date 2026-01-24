@@ -65,21 +65,41 @@ def apply_promotions(doc, method=None):
 # RESET PREVIOUS PROMOTIONS (CRITICAL)
 # ============================================================
 
+# def reset_previous_promotions(doc):
+#     if doc.docstatus == 1:
+#         return
+#     # Remove promotion-created rows
+#     doc.items = [row for row in doc.items if not getattr(row, "is_free_item", 0)]
+
+#     for row in doc.items:
+#         # Always restore rate from price_list_rate
+#         if row.price_list_rate:
+#             row.rate = row.price_list_rate
+
+#         row.discount_percentage = 0
+#         row.discount_amount = 0
+#         row.is_free_item = 0
+
 def reset_previous_promotions(doc):
     if doc.docstatus == 1:
         return
-    # Remove promotion-created rows
+
+    # Remove ONLY free promo rows
     doc.items = [row for row in doc.items if not getattr(row, "is_free_item", 0)]
 
     for row in doc.items:
-        # Always restore rate from price_list_rate
-        if row.price_list_rate:
-            row.rate = row.price_list_rate
+        # 🔐 Agar manual discount dala hai → usko chhedo mat
+        if row.discount_percentage or row.discount_amount:
+            continue
 
-        row.discount_percentage = 0
-        row.discount_amount = 0
-        row.is_free_item = 0
+        # 🔁 Sirf promo-applied items reset honge
+        if getattr(row, "custom_is_promo_scheme", 0):
+            if row.price_list_rate:
+                row.rate = row.price_list_rate
 
+            row.discount_percentage = 0
+            row.discount_amount = 0
+            row.is_free_item = 0
 
 # ============================================================
 # SCHEME FETCHING
