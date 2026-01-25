@@ -78,3 +78,81 @@ frappe.ui.form.on("Sales Team", {
         set_incentive_from_sales_person(frm, row);
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+frappe.ui.form.on("Sales Order Item", {
+    item_code(frm, cdt, cdn) {
+        check_mrp_rsp_price(frm, cdt, cdn);
+    },
+    rate(frm, cdt, cdn) {
+        check_mrp_rsp_price(frm, cdt, cdn);
+    }
+});
+
+function check_mrp_rsp_price(frm, cdt, cdn) {
+    let row = locals[cdt][cdn];
+
+    if (!row.item_code || !row.rate) return;
+
+    let price_list = frm.doc.selling_price_list;
+
+    // Sirf MRP / RSP ke liye
+    if (!["MRP", "RSP"].includes(price_list)) {
+        return;
+    }
+
+    frappe.call({
+        method: "franchise_erp.api.get_item_price",
+        args: {
+            item_code: row.item_code,
+            price_list: price_list
+        },
+        callback: function (r) {
+            if (!r.message) return;
+
+            let system_rate = parseFloat(r.message);
+            let so_rate = parseFloat(row.rate);
+
+            if (system_rate !== so_rate) {
+                frappe.confirm(
+                    `
+                    <b>Price Mismatch Found</b><br><br>
+                    Item: ${row.item_code}<br>
+                    Price List: ${price_list}<br>
+                    System Price: ${system_rate}<br>
+                    Sales Order Price: ${so_rate}<br><br>
+                    Do you want to update Item Price?
+                    `,
+                    function () {
+                        // YES → Update Item Price
+                        frappe.call({
+                            method: "franchise_erp.api.update_item_price",
+                            args: {
+                                item_code: row.item_code,
+                                price_list: price_list,
+                                new_rate: so_rate
+                            },
+                            callback: function () {
+                                frappe.msgprint("Item Price updated successfully.");
+                            }
+                        });
+                    },
+                    function () {
+                        // NO → Bypass
+                        frappe.msgprint("Item Price not updated. Sales Order will continue.");
+                    }
+                );
+            }
+        }
+    });
+}
