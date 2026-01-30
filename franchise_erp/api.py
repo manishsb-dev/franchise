@@ -278,3 +278,37 @@ def generate_custom_barcode(data):
 
     img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return "data:image/png;base64," + img_str
+
+
+
+
+
+
+
+import frappe
+from frappe import _
+from datetime import date
+
+@frappe.whitelist()
+def get_item_price(item_code, price_list):
+    return frappe.db.get_value(
+    price = frappe.get_all(
+        "Item Price",
+        {"item_code": item_code, "price_list": price_list},
+        "price_list_rate"
+        filters={
+            "item_code": item_code,
+            "price_list": price_list
+        },
+        fields=["price_list_rate", "valid_from", "valid_upto"],
+        order_by="valid_from desc",
+        limit=1
+    )
+
+    if price:
+        return {
+            "rate": price[0].price_list_rate,
+            "valid_from": price[0].valid_from,
+            "valid_upto": price[0].valid_upto
+        }
+    return None
